@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PRIVY_APP_ID } from "@/lib/privy.functions";
 import { CHAINS } from "@/lib/verification";
+import { TokenRow } from "@/components/TokenRow";
+import { usd, usePrices } from "@/lib/prices";
 import { SolanaPanel, SOL_RPC, SOL_WSS } from "@/components/SolanaWallet";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
@@ -44,7 +46,8 @@ function Inner() {
   const [netKey, setNetKey] = useState("base");
   const BASE = (NETS.find((n) => n.key === netKey) ?? NETS[0]) as (typeof NETS)[number];
   const TOKENS: Tok[] = [{ sym: BASE.native, decimals: 18 }, ...BASE.tokens];
-  const [bal, setBal] = useState<Record<string, string>>({});
+  const [bal, setBal] = useState<Record<string, number>>({});
+  const prices = usePrices();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState<null | "receive" | "send">(null);
   const [qr, setQr] = useState("");
@@ -59,12 +62,12 @@ function Inner() {
     if (!w || !net) return;
     setLoading(true);
     try {
-      const out: Record<string, string> = {};
+      const out: Record<string, number> = {};
       for (const t of [{ sym: net.native, decimals: 18 } as Tok, ...net.tokens]) {
         const v = t.address
           ? await rpc(net.rpc, "eth_call", [{ to: t.address, data: encodeFunctionData({ abi: erc20Abi, functionName: "balanceOf", args: [w.address as `0x${string}`] }) }, "latest"])
           : await rpc(net.rpc, "eth_getBalance", [w.address, "latest"]);
-        out[t.sym] = Number(formatUnits(v, t.decimals)).toLocaleString("en-US", { maximumFractionDigits: t.address ? 2 : 6 });
+        out[t.sym] = Number(formatUnits(v, t.decimals));
       }
       setBal(out);
     } catch { toast.error("Gagal memuat saldo."); } finally { setLoading(false); }
@@ -111,9 +114,13 @@ function Inner() {
           {selector}
           <button onClick={() => { void navigator.clipboard.writeText(w.address); toast.success("Alamat disalin"); }} className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground"><Copy className="size-3.5" />{short}</button>
         </div>
-        <ul className="mt-4 space-y-2">
-          {TOKENS.map((t) => <li key={t.sym} className="flex items-center justify-between rounded-xl bg-surface/60 px-3 py-2.5 text-sm"><span className="font-semibold">{t.sym}</span><span className="font-mono">{bal[t.sym] ?? "—"}</span></li>)}
-          <li className="flex items-center justify-between rounded-xl bg-surface/40 px-3 py-2.5 text-sm text-muted-foreground"><span className="font-semibold">$MIND</span><span className="text-[11px] font-bold">SOON</span></li>
+        <div className="mt-5 text-center">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Total saldo</p>
+          <p className="mt-1 text-4xl font-bold">{usd(TOKENS.reduce((a, t) => a + (bal[t.sym] ?? 0) * (prices[t.sym]?.usd ?? 0), 0))}</p>
+        </div>
+        <ul className="mt-5 space-y-2">
+          {TOKENS.map((t) => <TokenRow key={t.sym} sym={t.sym} amount={bal[t.sym]} price={prices[t.sym]} network={BASE.name} />)}
+          <li className="flex items-center justify-between rounded-2xl bg-surface/40 px-3 py-3 text-sm text-muted-foreground"><span className="font-semibold">$MIND</span><span className="text-[11px] font-bold">SOON</span></li>
         </ul>
         <div className="mt-5 grid grid-cols-3 gap-2">
           <Button variant="surface" onClick={() => setOpen("receive")}><ArrowDownLeft className="size-4" />Receive</Button>
@@ -141,7 +148,7 @@ function Inner() {
           <DialogHeader><DialogTitle>Send di {BASE.name}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-3 gap-2">{TOKENS.map((t) => <Button key={t.sym} size="sm" variant={sym === t.sym ? "default" : "surface"} onClick={() => setSym(t.sym)}>{t.sym}</Button>)}</div>
           <input value={to} onChange={(e) => setTo(e.target.value.trim())} placeholder="Alamat tujuan 0x…" className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 font-mono text-sm outline-none focus:border-primary" />
-          <input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder={`Nominal (saldo ${bal[sym] ?? "0"})`} className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
+          <input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder={`Nominal (saldo ${bal[sym] ?? 0})`} className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
           <p className="text-xs text-muted-foreground">Butuh sedikit {BASE.native} di {BASE.name} untuk biaya jaringan.</p>
           <Button disabled={sending || !to || !amount} onClick={() => void send()}>{sending ? <Loader2 className="size-4 animate-spin" /> : <ArrowUpRight className="size-4" />}Kirim {sym}</Button>
         </DialogContent>

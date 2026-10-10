@@ -7,6 +7,8 @@ import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Copy, ExternalLink, Loader
 import QRCode from "qrcode";
 import { toast } from "sonner";
 
+import { TokenRow } from "@/components/TokenRow";
+import { usd, usePrices } from "@/lib/prices";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -20,7 +22,8 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
   const { createWallet } = useCreateWallet();
   const { signAndSendTransaction } = useSignAndSendTransaction();
   const w = wallets.find((x) => x.standardWallet?.name === "Privy") ?? wallets[0];
-  const [bal, setBal] = useState<{ SOL?: string; USDC?: string }>({});
+  const [bal, setBal] = useState<{ SOL?: number; USDC?: number }>({});
+  const prices = usePrices();
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [open, setOpen] = useState<null | "receive" | "send">(null);
@@ -42,7 +45,7 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
         const d = info.value?.data as { parsed?: { info?: { tokenAmount?: { uiAmount?: number } } } } | undefined;
         usdc = Number(d?.parsed?.info?.tokenAmount?.uiAmount ?? 0);
       } catch { usdc = 0; }
-      setBal({ SOL: (Number(value) / 1e9).toLocaleString("en-US", { maximumFractionDigits: 6 }), USDC: usdc.toLocaleString("en-US", { maximumFractionDigits: 2 }) });
+      setBal({ SOL: Number(value) / 1e9, USDC: usdc });
     } catch { toast.error("Gagal memuat saldo Solana."); } finally { setLoading(false); }
   }, [w]);
   useEffect(() => { void load(); }, [load]);
@@ -90,8 +93,12 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
           {selector}
           <button onClick={copy} className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground"><Copy className="size-3.5" />{short}</button>
         </div>
-        <ul className="mt-4 space-y-2">
-          {(["SOL", "USDC"] as const).map((s) => <li key={s} className="flex items-center justify-between rounded-xl bg-surface/60 px-3 py-2.5 text-sm"><span className="font-semibold">{s}</span><span className="font-mono">{bal[s] ?? "—"}</span></li>)}
+        <div className="mt-5 text-center">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Total saldo</p>
+          <p className="mt-1 text-4xl font-bold">{usd((bal.SOL ?? 0) * (prices["SOL"]?.usd ?? 0) + (bal.USDC ?? 0) * (prices["USDC"]?.usd ?? 1))}</p>
+        </div>
+        <ul className="mt-5 space-y-2">
+          {(["SOL", "USDC"] as const).map((s) => <TokenRow key={s} sym={s} amount={bal[s]} price={prices[s]} network="Solana" />)}
         </ul>
         <div className="mt-5 grid grid-cols-3 gap-2">
           <Button variant="surface" onClick={() => setOpen("receive")}><ArrowDownLeft className="size-4" />Receive</Button>
