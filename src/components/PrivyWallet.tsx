@@ -14,6 +14,8 @@ import { CHAINS } from "@/lib/verification";
 import { TokenRow } from "@/components/TokenRow";
 import { usd, usePrices } from "@/lib/prices";
 import { SolanaPanel, SOL_RPC, SOL_WSS } from "@/components/SolanaWallet";
+import { SwapDialog } from "@/components/SwapDialog";
+import { lifiQuote, NATIVE_EVM } from "@/lib/swap";
 import { toSolanaWalletConnectors } from "@privy-io/react-auth/solana";
 import { createSolanaRpc, createSolanaRpcSubscriptions } from "@solana/kit";
 
@@ -49,7 +51,7 @@ function Inner() {
   const [bal, setBal] = useState<Record<string, number>>({});
   const prices = usePrices();
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState<null | "receive" | "send">(null);
+  const [open, setOpen] = useState<null | "receive" | "send" | "swap">(null);
   const [qr, setQr] = useState("");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
@@ -125,13 +127,34 @@ function Inner() {
         <div className="mt-5 grid grid-cols-3 gap-2">
           <Button variant="surface" onClick={() => setOpen("receive")}><ArrowDownLeft className="size-4" />Receive</Button>
           <Button variant="surface" onClick={() => setOpen("send")}><ArrowUpRight className="size-4" />Send</Button>
-          <Button variant="surface" asChild><a href={BASE.swap} target="_blank" rel="noreferrer"><ArrowLeftRight className="size-4" />Swap</a></Button>
+          <Button variant="surface" onClick={() => setOpen("swap")}><ArrowLeftRight className="size-4" />Swap</Button>
         </div>
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
           <button onClick={() => void load()} className="flex items-center gap-1"><RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />Refresh</button>
           <a href={`${BASE.explorer}/address/${w.address}`} target="_blank" rel="noreferrer" className="flex items-center gap-1">{BASE.explorerName}<ExternalLink className="size-3.5" /></a>
         </div>
       </section>
+
+      <SwapDialog open={open === "swap"} onClose={() => setOpen(null)} network={BASE.name} balances={bal}
+        tokens={TOKENS.map((t) => ({ sym: t.sym, id: t.address ?? NATIVE_EVM, decimals: t.decimals }))}
+        getQuote={(f, t, a) => lifiQuote(BASE.id, f, t, a, w.address)}
+        execute={async (q, f, a) => {
+          const raw = q.raw as { estimate: { approvalAddress?: string }; transactionRequest: { to: string; data: string; value?: string; gasLimit?: string } };
+          await w.switchChain(BASE.id);
+          const eth = await w.getEthereumProvider();
+          if (f.id !== NATIVE_EVM && raw.estimate.approvalAddress) {
+            const spender = raw.estimate.approvalAddress as `0x${string}`;
+            const allowance = await rpc(BASE.rpc, "eth_call", [{ to: f.id, data: encodeFunctionData({ abi: erc20Abi, functionName: "allowance", args: [w.address as `0x${string}`, spender] }) }, "latest"]);
+            if (allowance < a) {
+              toast.message("Setujui token dulu, lalu konfirmasi swap.");
+              await eth.request({ method: "eth_sendTransaction", params: [{ from: w.address, to: f.id, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [spender, a] }) }] });
+              await new Promise((r) => setTimeout(r, 4000));
+            }
+          }
+          const tx = raw.transactionRequest;
+          await eth.request({ method: "eth_sendTransaction", params: [{ from: w.address, to: tx.to, data: tx.data, value: tx.value, gas: tx.gasLimit }] });
+          setTimeout(() => void load(), 6000);
+        }} />
 
       <Dialog open={open === "receive"} onOpenChange={(o) => !o && setOpen(null)}>
         <DialogContent className="max-w-sm">

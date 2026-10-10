@@ -11,6 +11,8 @@ import { TokenRow } from "@/components/TokenRow";
 import { usd, usePrices } from "@/lib/prices";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SwapDialog } from "@/components/SwapDialog";
+import { jupQuote, jupSwapTx, SOL_MINT } from "@/lib/swap";
 
 export const SOL_RPC = "https://solana-rpc.publicnode.com";
 export const SOL_WSS = "wss://solana-rpc.publicnode.com";
@@ -26,7 +28,7 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
   const prices = usePrices();
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [open, setOpen] = useState<null | "receive" | "send">(null);
+  const [open, setOpen] = useState<null | "receive" | "send" | "swap">(null);
   const [qr, setQr] = useState("");
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
@@ -103,13 +105,22 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
         <div className="mt-5 grid grid-cols-3 gap-2">
           <Button variant="surface" onClick={() => setOpen("receive")}><ArrowDownLeft className="size-4" />Receive</Button>
           <Button variant="surface" onClick={() => setOpen("send")}><ArrowUpRight className="size-4" />Send</Button>
-          <Button variant="surface" asChild><a href="https://jup.ag" target="_blank" rel="noreferrer"><ArrowLeftRight className="size-4" />Swap</a></Button>
+          <Button variant="surface" onClick={() => setOpen("swap")}><ArrowLeftRight className="size-4" />Swap</Button>
         </div>
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
           <button onClick={() => void load()} className="flex items-center gap-1"><RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />Refresh</button>
           <a href={`https://solscan.io/account/${w.address}`} target="_blank" rel="noreferrer" className="flex items-center gap-1">Solscan<ExternalLink className="size-3.5" /></a>
         </div>
       </section>
+
+      <SwapDialog open={open === "swap"} onClose={() => setOpen(null)} network="Solana" balances={bal}
+        tokens={[{ sym: "SOL", id: SOL_MINT, decimals: 9 }, { sym: "USDC", id: USDC_MINT, decimals: 6 }]}
+        getQuote={jupQuote}
+        execute={async (q) => {
+          const tx = await jupSwapTx(q.raw, w.address);
+          await signAndSendTransaction({ transaction: tx, wallet: w, chain: "solana:mainnet" });
+          setTimeout(() => void load(), 5000);
+        }} />
 
       <Dialog open={open === "receive"} onOpenChange={(o) => !o && setOpen(null)}>
         <DialogContent className="max-w-sm">
