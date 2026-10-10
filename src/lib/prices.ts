@@ -21,7 +21,7 @@ export function usePrices() {
         const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
         const j = (await r.json()) as Record<string, { usd: number; usd_24h_change: number }>;
         const out: Record<string, Price> = {};
-        for (const [sym, m] of Object.entries(TOKEN_META)) if (m.id && j[m.id]) out[sym] = { usd: j[m.id].usd, change: j[m.id].usd_24h_change ?? 0 };
+        for (const [sym, m] of Object.entries(TOKEN_META)) { const p = m.id ? j[m.id] : undefined; if (p) out[sym] = { usd: p.usd, change: p.usd_24h_change ?? 0 }; }
         if (alive) setPrices(out);
       } catch { /* keep last prices */ }
     };
