@@ -1,6 +1,6 @@
 import { TOKEN_META, usd, type Price } from "@/lib/prices";
 
-export function TokenRow({ sym, amount, price, network }: { sym: string; amount?: number; price?: Price; network: string }) {
+export function TokenRow({ sym, amount, price, network }: { sym: string; amount?: number | undefined; price?: Price | undefined; network: string }) {
   const logo = TOKEN_META[sym]?.logo;
   const value = amount !== undefined && price ? amount * price.usd : undefined;
   const up = (price?.change ?? 0) >= 0;

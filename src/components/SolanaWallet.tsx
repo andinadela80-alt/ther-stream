@@ -95,7 +95,7 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
         </div>
         <div className="mt-5 text-center">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Total saldo</p>
-          <p className="mt-1 text-4xl font-bold">{usd((bal.SOL ?? 0) * (prices.SOL?.usd ?? 0) + (bal.USDC ?? 0) * (prices.USDC?.usd ?? 1))}</p>
+          <p className="mt-1 text-4xl font-bold">{usd((bal.SOL ?? 0) * (prices["SOL"]?.usd ?? 0) + (bal.USDC ?? 0) * (prices["USDC"]?.usd ?? 1))}</p>
         </div>
         <ul className="mt-5 space-y-2">
           {(["SOL", "USDC"] as const).map((s) => <TokenRow key={s} sym={s} amount={bal[s]} price={prices[s]} network="Solana" />)}
