@@ -17,6 +17,7 @@ import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PostRouteImport } from './routes/post'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as WalletRouteImport } from './routes/wallet'
@@ -61,6 +62,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/post'
     | '/profile'
+    | '/sitemap.xml'
     | '/support'
     | '/verify'
     | '/wallet'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/post'
     | '/profile'
+    | '/sitemap.xml'
     | '/support'
     | '/verify'
     | '/wallet'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/post'
     | '/profile'
+    | '/sitemap.xml'
     | '/support'
     | '/verify'
     | '/wallet'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   PostRoute: typeof PostRoute
   ProfileRoute: typeof ProfileRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   VerifyRoute: typeof VerifyRoute
   WalletRoute: typeof WalletRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   PostRoute: PostRoute,
   ProfileRoute: ProfileRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   VerifyRoute: VerifyRoute,
   WalletRoute: WalletRoute,

@@ -11,16 +11,21 @@ import { normalize, POST_SELECT, type Post } from "@/lib/social";
 export const Route = createFileRoute("/cashtag")({
   staticData: { sitemap: false },
   validateSearch: zodValidator(z.object({ s: fallback(z.string(), "").default("") })),
-  head: () => ({
+  head: ({ match }) => {
+    const tag = (match.search.s ?? "").replace(/[^A-Za-z0-9]/g, "").slice(0, 15).toUpperCase();
+    const title = tag ? `$${tag} — Community posts on Mindcaster` : "Cashtag — Mindcaster";
+    const desc = tag ? `Latest community posts and signals about $${tag} on Mindcaster.` : "Community posts about a token cashtag on Mindcaster.";
+    return {
     meta: [
-      { title: "Cashtag — Mindcaster" },
-      { name: "description", content: "Community posts about a token cashtag on Mindcaster." },
-      { property: "og:title", content: "Cashtag — Mindcaster" },
-      { property: "og:description", content: "Community posts about a token cashtag on Mindcaster." },
+      { title },
+      { name: "description", content: desc },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-  }),
+  };
+  },
   component: CashtagRoute,
 });
 
