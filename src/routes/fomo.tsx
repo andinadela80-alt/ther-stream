@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { RefreshCw, Share2 } from "lucide-react";
+import { Check, Copy, RefreshCw, Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 import fomoLogo from "@/assets/fomo-logo.jpg.asset.json";
 import { AppShell } from "@/components/AppShell";
@@ -55,6 +56,19 @@ const usd = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? n
 const when = (v: unknown) => { const d = new Date(typeof v === "number" && v < 1e12 ? v * 1000 : (v as string)); return isNaN(+d) ? "" : d.toLocaleString(); };
 const trader = (r: Row) => str(pick(r, "trader.handle", "trader.username", "user.handle", "user.username", "handle", "username", "trader.name", "name")) || "Trader";
 const token = (r: Row) => str(pick(r, "token.symbol", "symbol", "token_symbol", "token.name", "token"));
+const ca = (r: Row) => {
+  const v = str(pick(r, "token.address", "token.contractAddress", "token.contract_address", "token.mint", "tokenAddress", "token_address", "contractAddress", "contract_address", "address", "mint", "ca"));
+  return /^(0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44})$/.test(v) ? v : "";
+};
+
+function CopyCA({ addr }: { addr: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <button type="button" onClick={() => { void navigator.clipboard.writeText(addr).then(() => { setDone(true); toast.success("Contract address copied"); setTimeout(() => setDone(false), 1500); }); }} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface/70 px-3 py-1 font-mono text-[11px] text-muted-foreground" aria-label="Copy contract address">
+      CA: {addr.slice(0, 6)}…{addr.slice(-4)} {done ? <Check className="size-3.5 text-primary" /> : <Copy className="size-3.5" />}
+    </button>
+  );
+}
 
 function Fomo() {
   const fetchFomo = useServerFn(getFomo);
@@ -62,7 +76,8 @@ function Fomo() {
   const share = (r: Row, text: string, side: string) => {
     const tk = token(r).replace(/[^A-Za-z0-9]/g, "");
     const val = pick(r, "value_usd", "amount_usd", "position_usd", "size_usd");
-    const draft = `📡 FOMO signal: ${trader(r)}${side ? ` ${side}` : ""}${tk ? ` $${tk.toUpperCase()}` : ""}${val !== undefined ? ` (${usd(val)})` : ""}${text ? `\n\n"${text.slice(0, 300)}"` : ""}`;
+    const addr = ca(r);
+    const draft = `📡 FOMO signal: ${trader(r)}${side ? ` ${side}` : ""}${tk ? ` $${tk.toUpperCase()}` : ""}${val !== undefined ? ` (${usd(val)})` : ""}${text ? `\n\n"${text.slice(0, 300)}"` : ""}${addr ? `\n\nCA: ${addr}` : ""}`;
     sessionStorage.setItem("mc-draft", draft);
     void navigate({ to: "/" });
   };
@@ -129,7 +144,10 @@ function Fomo() {
                 </div>
                 {text && <p className="mt-2 whitespace-pre-wrap break-words text-sm">{text}</p>}
                 <p className="mt-2 text-xs text-muted-foreground">{[pick(r, "value_usd", "amount_usd", "position_usd", "size_usd") !== undefined ? usd(pick(r, "value_usd", "amount_usd", "position_usd", "size_usd")) : "", when(pick(r, "created_at", "timestamp", "time"))].filter(Boolean).join(" · ")}</p>
-                <button type="button" onClick={() => share(r, text, side)} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface/70 px-3 py-1 text-xs font-semibold text-primary"><Share2 className="size-3.5" />Share to feed</button>
+                <div className="flex flex-wrap gap-2">
+                  {ca(r) && <CopyCA addr={ca(r)} />}
+                  <button type="button" onClick={() => share(r, text, side)} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface/70 px-3 py-1 text-xs font-semibold text-primary"><Share2 className="size-3.5" />Share to feed</button>
+                </div>
               </article>
             );
           })}
