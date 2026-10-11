@@ -81,10 +81,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Mindcaster" },
+      { title: "Mindcaster — Where Ideas Become Onchain" },
       { name: "description", content: "Where Ideas Become Onchain on Mindcaster." },
       { name: "author", content: "Mindcaster" },
-      { property: "og:title", content: "Mindcaster" },
+      { property: "og:title", content: "Mindcaster — Where Ideas Become Onchain" },
       { property: "og:description", content: "Where Ideas Become Onchain on Mindcaster." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

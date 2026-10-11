@@ -67,7 +67,7 @@ export function AppShell({ title, actions, children }: { title: string; actions?
               <span className="signal-ring signal-ring-delay-2 absolute inset-0 rounded-full border border-primary/40" />
                 <BrandLogo size={44} className="relative shadow-signal" />
             </div>
-            <h1 className="font-display text-[22px] font-semibold leading-tight">Mindcaster</h1>
+            <h1 className="font-display text-[22px] font-semibold leading-tight">Mindcaster — Where Ideas Become Onchain</h1>
             <span className="mt-2 inline-block rounded-full bg-primary/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">{t("betaAccess")}</span>
             <p className="mt-1.5 text-sm font-medium text-muted-foreground">Where Ideas Become Onchain</p>
           </header>
@@ -80,7 +80,7 @@ export function AppShell({ title, actions, children }: { title: string; actions?
               <Link to="/profile" search={{}} aria-label="Buka profil saya" className="rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
                 <Avatar profile={profile} size={34} />
               </Link>
-              {title === "Home" ? <BrandLogo size={34} className="pointer-events-none absolute left-1/2 -translate-x-1/2" /> : <h1 className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate font-display text-base font-semibold">{title === "Discover" ? t("discover") : title === "Notifications" ? t("notifications") : title === "Messages" ? t("messages") : title === "Profile" ? t("profile") : title}</h1>}
+              {title === "Home" ? <><h1 className="sr-only">Home — Mindcaster Feed</h1><BrandLogo size={34} className="pointer-events-none absolute left-1/2 -translate-x-1/2" /></> : <h1 className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate font-display text-base font-semibold">{title === "Discover" ? t("discover") : title === "Notifications" ? t("notifications") : title === "Messages" ? t("messages") : title === "Profile" ? t("profile") : title}</h1>}
               <div className="relative ml-auto">{actions}{actions && unread > 0 && <span aria-label="New notifications" className="pointer-events-none absolute right-1 top-1 size-2.5 rounded-full bg-destructive ring-2 ring-background" />}</div>
             </div>
           </header>
