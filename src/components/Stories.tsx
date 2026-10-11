@@ -119,7 +119,7 @@ export function Stories({ userId, onError }: { userId: string; onError: (m: stri
 
   useEffect(() => {
     if (!cur || cur.media_type !== "image" || paused) return;
-    const timer = setTimeout(next, 5000);
+    const timer = setTimeout(next, 15000);
     return () => clearTimeout(timer);
   });
 
