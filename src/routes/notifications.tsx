@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { displayName, timeAgo, type Author } from "@/lib/social";
 
 export const Route = createFileRoute("/notifications")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Notifications — Mindcaster" },

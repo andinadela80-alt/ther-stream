@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/support")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Support & About — Mindcaster" },

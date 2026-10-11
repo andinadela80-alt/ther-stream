@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { displayName, handle, timeAgo, type Profile } from "@/lib/social";
 
 export const Route = createFileRoute("/messages")({
+  staticData: { sitemap: false },
   validateSearch: z.object({ with: z.string().uuid().optional() }),
   head: () => ({
     meta: [

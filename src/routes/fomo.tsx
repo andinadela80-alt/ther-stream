@@ -8,6 +8,7 @@ import { AppShell } from "@/components/AppShell";
 import { getFomo } from "@/lib/fomo.functions";
 
 export const Route = createFileRoute("/fomo")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Fomo — Mindcaster" },

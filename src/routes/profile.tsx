@@ -18,17 +18,24 @@ import { profileLink, shareLink } from "@/lib/share";
 import { displayName, fetchPosts, handle, joined, resizeImage, short, type Post, type Profile } from "@/lib/social";
 
 export const Route = createFileRoute("/profile")({
+  staticData: { sitemap: false },
   validateSearch: z.object({ id: z.string().uuid().optional(), u: z.string().max(40).optional() }),
-  head: () => ({
+  head: ({ match }) => {
+    const u = (match.search.u ?? "").replace(/[^A-Za-z0-9_]/g, "");
+    const title = u ? `@${u} — Profile on Mindcaster` : "Profile — Mindcaster";
+    const desc = u ? `See @${u}'s posts, bio, and reposts on Mindcaster.` : "View profiles, posts, and reposts on Mindcaster.";
+    return {
     meta: [
-      { title: "Profile — Mindcaster" },
-      { name: "description", content: "Mindcaster profile: bio, username, photo, posts, and reminds." },
-      { property: "og:title", content: "Profile — Mindcaster" },
-      { property: "og:description", content: "View profiles, posts, and reposts on Mindcaster." },
+      { title },
+      { name: "description", content: desc },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
       { property: "og:type", content: "profile" },
       { name: "twitter:card", content: "summary" },
     ],
-  }),
+    scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "ProfilePage", name: title, mainEntity: { "@type": "Person", ...(u ? { alternateName: `@${u}` } : {}) } }) }],
+  };
+  },
   component: ProfileRoute,
 });
 

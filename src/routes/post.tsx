@@ -7,6 +7,7 @@ import { PostCard } from "@/components/PostCard";
 import { fetchPosts, type Post } from "@/lib/social";
 
 export const Route = createFileRoute("/post")({
+  staticData: { sitemap: false },
   validateSearch: z.object({ id: z.string().uuid().optional() }),
   head: () => ({
     meta: [
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/post")({
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
     ],
+    scripts: [{ type: "application/ld+json", children: JSON.stringify({ "@context": "https://schema.org", "@type": "SocialMediaPosting", headline: "Post on Mindcaster", publisher: { "@type": "Organization", name: "Mindcaster" } }) }],
   }),
   component: PostRoute,
 });
