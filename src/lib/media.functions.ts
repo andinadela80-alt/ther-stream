@@ -31,5 +31,5 @@ export const createUploadUrl = createServerFn({ method: "POST" })
     const url = new URL(`https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key}`);
     url.searchParams.set("X-Amz-Expires", "300");
     const signed = await client.sign(new Request(url, { method: "PUT", headers: { "content-type": data.contentType } }), { aws: { signQuery: true } });
-    return { uploadUrl: signed.url, publicUrl: `${publicUrl.replace(/\/$/, "")}/${key}` };
+    return { uploadUrl: signed.url, publicUrl: `/media/${key}` };
   });
