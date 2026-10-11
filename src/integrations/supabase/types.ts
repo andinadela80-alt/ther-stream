@@ -596,6 +596,7 @@ export type Database = {
       verified_badges: {
         Row: {
           og: boolean
+          og_free_claimed: boolean
           promo_used: boolean
           updated_at: string
           user_id: string
@@ -603,6 +604,7 @@ export type Database = {
         }
         Insert: {
           og?: boolean
+          og_free_claimed?: boolean
           promo_used?: boolean
           updated_at?: string
           user_id: string
@@ -610,6 +612,7 @@ export type Database = {
         }
         Update: {
           og?: boolean
+          og_free_claimed?: boolean
           promo_used?: boolean
           updated_at?: string
           user_id?: string
@@ -630,11 +633,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_og_badge: { Args: never; Returns: string }
       get_my_wallet: {
         Args: never
         Returns: {
           wallet_address: string
           wallet_verified_at: string
+        }[]
+      }
+      og_claim_status: {
+        Args: never
+        Returns: {
+          claimed: boolean
+          used: number
         }[]
       }
     }

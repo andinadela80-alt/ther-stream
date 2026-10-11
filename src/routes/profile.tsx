@@ -7,6 +7,7 @@ import type { User } from "@supabase/supabase-js";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { IdentityBadges } from "@/components/IdentityBadges";
+import { ClaimOgCard } from "@/components/ClaimOgCard";
 import { FollowStats, ProfileFollowButton } from "@/components/FollowLists";
 import { PostCard } from "@/components/PostCard";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,7 @@ function ProfileView({ user, profileId }: { user: User; profileId: string }) {
         </div>
       </section>
 
+      {isMe && <ClaimOgCard />}
       {editing && isMe && <EditProfile profile={profile} onDone={() => { setEditing(false); void loadProfile(); void loadPosts(); }} />}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
