@@ -15,6 +15,13 @@
       "when": 1791720076688,
       "tag": "0001_media_proxy_urls",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791721952568,
+      "tag": "0002_og_free_claim",
+      "breakpoints": true
     }
   ]
 }
