@@ -7,18 +7,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 const CURATED = new Set(["ybs", "thorvox", "mindcaster"]);
 
-type BadgeMap = Map<string, { og: boolean }>;
+type BadgeMap = Map<string, { og: boolean; verified: boolean }>;
 let paid: BadgeMap = new Map();
 let loaded = false;
 const listeners = new Set<() => void>();
 
 export async function refreshBadges() {
   loaded = true;
-  const { data } = await supabase.from("verified_badges").select("og, verified_until, profiles(username)").gt("verified_until", new Date().toISOString());
+  const now = new Date().toISOString();
+  const { data } = await supabase.from("verified_badges").select("og, verified_until, profiles(username)").or(`verified_until.gt.${now},og.eq.true`);
   const next: BadgeMap = new Map();
-  for (const row of (data ?? []) as { og: boolean; profiles: { username: string | null } | null }[]) {
+  for (const row of (data ?? []) as { og: boolean; verified_until: string; profiles: { username: string | null } | null }[]) {
     const u = row.profiles?.username?.toLowerCase();
-    if (u) next.set(u, { og: row.og });
+    if (u) next.set(u, { og: row.og, verified: Date.parse(row.verified_until) > Date.now() });
   }
   paid = next;
   listeners.forEach((l) => l());
@@ -35,11 +36,12 @@ export function IdentityBadges({ username }: { username?: string | null | undefi
   const key = username?.toLowerCase();
   if (!key) return null;
   const sub = map.get(key);
-  if (!CURATED.has(key) && !sub) return null;
+  const curated = CURATED.has(key);
+  if (!curated && !sub) return null;
   return (
-    <span className="inline-flex shrink-0 items-center gap-0.5" aria-label="Verified Mindcaster account" title="Verified Mindcaster account">
-      <BadgeCheck className="size-4 fill-primary text-primary-foreground" />
-      {CURATED.has(key) && <BrandLogo size={16} className="rounded-full ring-1 ring-primary/40" />}
+    <span className="inline-flex shrink-0 items-center gap-0.5" aria-label="Mindcaster badges" title="Mindcaster badges">
+      {(curated || sub?.verified) && <BadgeCheck className="size-4 fill-primary text-primary-foreground" />}
+      {curated && <BrandLogo size={16} className="rounded-full ring-1 ring-primary/40" />}
       {sub?.og && <img src={ogBadge.url} alt="OG" title="OG member" width={16} height={16} className="size-4 rounded-full ring-1 ring-primary/40" />}
     </span>
   );
