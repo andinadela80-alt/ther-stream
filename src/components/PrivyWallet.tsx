@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Copy, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 // @ts-expect-error qrcode ships without types
 import QRCode from "qrcode";
-import { defineChain, encodeFunctionData, erc20Abi, formatUnits, isAddress, parseUnits } from "viem";
+import { decodeFunctionResult, defineChain, encodeFunctionData, erc20Abi, formatUnits, isAddress, parseUnits } from "viem";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,28 @@ const NETS: Net[] = [
 ];
 const SUPPORTED = NETS.map((n) => defineChain({ id: n.id, name: n.name, nativeCurrency: { name: n.native, symbol: n.native, decimals: 18 }, rpcUrls: { default: { http: [n.rpc] } }, blockExplorers: { default: { name: n.explorerName, url: n.explorer } } }));
 
+const POPULAR: Record<string, Tok[]> = {
+  base: [
+    { sym: "VIRTUAL", address: "0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b", decimals: 18 },
+    { sym: "WETH", address: "0x4200000000000000000000000000000000000006", decimals: 18 },
+    { sym: "cbBTC", address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf", decimals: 8 },
+    { sym: "AERO", address: "0x940181a94A35A4569E4529A3CDfB74e38FD98631", decimals: 18 },
+    { sym: "DEGEN", address: "0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed", decimals: 18 },
+    { sym: "BRETT", address: "0x532f27101965dd16442E59d40670FaF5eBB142E4", decimals: 18 },
+    { sym: "TOSHI", address: "0xAC1Bd2486aAf3B5C0fc3Fd868558b082a531B2B4", decimals: 18 },
+  ],
+  arbitrum: [{ sym: "ARB", address: "0x912CE59144191C1204E64559FE8253a0e49E6548", decimals: 18 }, { sym: "WETH", address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", decimals: 18 }],
+  ethereum: [{ sym: "WETH", address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", decimals: 18 }, { sym: "PEPE", address: "0x6982508145454Ce325dDbE47a25d4ec3d2311933", decimals: 18 }],
+  bnb: [{ sym: "CAKE", address: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82", decimals: 18 }],
+};
+const customKey = (net: string) => `mc_custom_tokens_${net}`;
+function loadCustom(net: string): Tok[] { try { return JSON.parse(localStorage.getItem(customKey(net)) ?? "[]") as Tok[]; } catch { return []; } }
+
+async function rpcRaw(url: string, to: string, data: string) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to, data }, "latest"] }) });
+  return ((await r.json()) as { result?: `0x${string}` }).result ?? "0x";
+}
+
 async function rpc(url: string, method: string, params: unknown[]) {
   const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) });
   const j = (await r.json()) as { result?: string };
@@ -47,7 +70,10 @@ function Inner() {
   const w = wallets.find((x) => x.walletClientType === "privy");
   const [netKey, setNetKey] = useState("base");
   const BASE = (NETS.find((n) => n.key === netKey) ?? NETS[0]) as (typeof NETS)[number];
-  const TOKENS: Tok[] = [{ sym: BASE.native, decimals: 18 }, ...BASE.tokens];
+  const [custom, setCustom] = useState<Tok[]>([]);
+  useEffect(() => { setCustom(loadCustom(netKey)); }, [netKey]);
+  const ALL: Tok[] = [{ sym: BASE.native, decimals: 18 }, ...BASE.tokens, ...custom, ...(POPULAR[netKey] ?? []).filter((p) => !custom.some((c) => c.address?.toLowerCase() === p.address?.toLowerCase()))];
+  const ALL_KEY = ALL.map((t) => t.sym).join(",");
   const [bal, setBal] = useState<Record<string, number>>({});
   const prices = usePrices();
   const [loading, setLoading] = useState(false);
@@ -57,6 +83,11 @@ function Inner() {
   const [amount, setAmount] = useState("");
   const [sym, setSym] = useState("ETH");
   const [sending, setSending] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [ca, setCa] = useState("");
+  const [preview, setPreview] = useState<Tok | null>(null);
+  const [checking, setChecking] = useState(false);
+  const TOKENS: Tok[] = ALL.filter((t, i) => i <= BASE.tokens.length || custom.includes(t) || (bal[t.sym] ?? 0) > 0);
   useEffect(() => { setSym(BASE.native); setBal({}); }, [BASE.native, netKey]);
 
   const load = useCallback(async () => {
@@ -65,7 +96,7 @@ function Inner() {
     setLoading(true);
     try {
       const out: Record<string, number> = {};
-      for (const t of [{ sym: net.native, decimals: 18 } as Tok, ...net.tokens]) {
+      for (const t of ALL) {
         const v = t.address
           ? await rpc(net.rpc, "eth_call", [{ to: t.address, data: encodeFunctionData({ abi: erc20Abi, functionName: "balanceOf", args: [w.address as `0x${string}`] }) }, "latest"])
           : await rpc(net.rpc, "eth_getBalance", [w.address, "latest"]);
@@ -73,7 +104,30 @@ function Inner() {
       }
       setBal(out);
     } catch { toast.error("Gagal memuat saldo."); } finally { setLoading(false); }
-  }, [w, netKey]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [w, netKey, ALL_KEY]);
+
+  async function checkCa(v: string) {
+    setCa(v); setPreview(null);
+    if (!isAddress(v)) return;
+    setChecking(true);
+    try {
+      const sym = decodeFunctionResult({ abi: erc20Abi, functionName: "symbol", data: await rpcRaw(BASE.rpc, v, encodeFunctionData({ abi: erc20Abi, functionName: "symbol" })) });
+      const dec = decodeFunctionResult({ abi: erc20Abi, functionName: "decimals", data: await rpcRaw(BASE.rpc, v, encodeFunctionData({ abi: erc20Abi, functionName: "decimals" })) });
+      setPreview({ sym: String(sym), address: v as `0x${string}`, decimals: Number(dec) });
+    } catch { toast.error(`Bukan token ERC20 di ${BASE.name}.`); } finally { setChecking(false); }
+  }
+  function addToken() {
+    if (!preview) return;
+    if (ALL.slice(0, BASE.tokens.length + 1 + custom.length).some((t) => t.sym === preview.sym || t.address?.toLowerCase() === preview.address?.toLowerCase())) { toast.error("Token sudah ada di daftar."); return; }
+    const next = [...custom, preview];
+    localStorage.setItem(customKey(netKey), JSON.stringify(next)); setCustom(next);
+    setAddOpen(false); setCa(""); setPreview(null); toast.success(`${preview.sym} ditambahkan`);
+  }
+  function removeToken(addr?: string) {
+    const next = custom.filter((c) => c.address !== addr);
+    localStorage.setItem(customKey(netKey), JSON.stringify(next)); setCustom(next);
+  }
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { if (w) void QRCode.toDataURL(w.address, { margin: 1, width: 240 }).then(setQr); }, [w]);
 
@@ -121,9 +175,10 @@ function Inner() {
           <p className="mt-1 text-4xl font-bold">{usd(TOKENS.reduce((a, t) => a + (bal[t.sym] ?? 0) * (prices[t.sym]?.usd ?? 0), 0))}</p>
         </div>
         <ul className="mt-5 space-y-2">
-          {TOKENS.map((t) => <TokenRow key={t.sym} sym={t.sym} amount={bal[t.sym]} price={prices[t.sym]} network={BASE.name} />)}
+          {TOKENS.map((t) => <div key={t.sym} onContextMenu={(e) => { if (custom.includes(t)) { e.preventDefault(); if (confirm(`Hapus ${t.sym} dari daftar?`)) removeToken(t.address); } }}><TokenRow sym={t.sym} amount={bal[t.sym]} price={prices[t.sym]} network={custom.includes(t) ? `${BASE.name} · custom` : BASE.name} /></div>)}
           <li className="flex items-center justify-between rounded-2xl bg-surface/40 px-3 py-3 text-sm text-muted-foreground"><span className="font-semibold">$MIND</span><span className="text-[11px] font-bold">SOON</span></li>
         </ul>
+        <button onClick={() => setAddOpen(true)} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border/60 py-2.5 text-xs font-semibold text-muted-foreground hover:text-primary"><Plus className="size-3.5" />Tambah token (smart contract)</button>
         <div className="mt-5 grid grid-cols-3 gap-2">
           <Button variant="surface" onClick={() => setOpen("receive")}><ArrowDownLeft className="size-4" />Receive</Button>
           <Button variant="surface" onClick={() => setOpen("send")}><ArrowUpRight className="size-4" />Send</Button>
@@ -155,6 +210,17 @@ function Inner() {
           await eth.request({ method: "eth_sendTransaction", params: [{ from: w.address, to: tx.to, data: tx.data, value: tx.value, gas: tx.gasLimit }] });
           setTimeout(() => void load(), 6000);
         }} />
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Tambah token di {BASE.name}</DialogTitle></DialogHeader>
+          <input value={ca} onChange={(e) => void checkCa(e.target.value.trim())} placeholder="Alamat kontrak 0x…" className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 font-mono text-sm outline-none focus:border-primary" />
+          {checking && <p className="flex justify-center"><Loader2 className="size-4 animate-spin" /></p>}
+          {preview && <p className="rounded-xl bg-surface/60 p-3 text-sm"><b>{preview.sym}</b> · {preview.decimals} desimal</p>}
+          <p className="text-xs text-muted-foreground">Token dengan saldo dari daftar populer muncul otomatis. Tahan/klik kanan token custom untuk menghapus.</p>
+          <Button disabled={!preview} onClick={addToken}><Plus className="size-4" />Tambahkan ke daftar</Button>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={open === "receive"} onOpenChange={(o) => !o && setOpen(null)}>
         <DialogContent className="max-w-sm">
