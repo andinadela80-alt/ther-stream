@@ -11,15 +11,15 @@ import { displayName, timeAgo, type Author } from "@/lib/social";
 export const Route = createFileRoute("/notifications")({
   head: () => ({
     meta: [
-      { title: "Notifikasi — Mindcaster" },
+      { title: "Notifications — Mindcaster" },
       { name: "description", content: "See who liked, reacted, commented, reminded, and messaged you." },
-      { property: "og:title", content: "Notifikasi — Mindcaster" },
+      { property: "og:title", content: "Notifications — Mindcaster" },
       { property: "og:description", content: "Latest activity on your Mindcaster account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <AppShell title="Notifikasi">{() => <Notifications />}</AppShell>,
+  component: () => <AppShell title="Notifications">{() => <Notifications />}</AppShell>,
 });
 
 type Notif = { id: string; type: string; detail: string | null; read: boolean; created_at: string; actor_id: string; post_id: string | null; actor: Author };

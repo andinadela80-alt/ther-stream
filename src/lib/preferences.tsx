@@ -65,7 +65,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     window.localStorage.removeItem("mindcaster-theme");
   }, []);
 
-  const locale: Locale = language === "id" ? "id" : "en";
+  const locale: Locale = "en";
   useEffect(() => { document.documentElement.lang = locale; }, [locale]);
 
   const value = useMemo<PreferencesValue>(() => ({
