@@ -42,7 +42,7 @@ export function SwapDialog({ open, onClose, network, tokens, balances, getQuote,
     const t = setTimeout(async () => {
       setLoading(true);
       try { const q = await getQuote(from, to, toUnits(amount, from.decimals)); if (alive) setQuote(q); }
-      catch (e) { if (alive) setErr((e as Error).message.slice(0, 120) || "Rute swap tidak ditemukan."); }
+      catch (e) { if (alive) setErr((e as Error).message.slice(0, 120) || "No swap route found."); }
       finally { if (alive) setLoading(false); }
     }, 600);
     return () => { alive = false; clearTimeout(t); };
@@ -63,23 +63,23 @@ export function SwapDialog({ open, onClose, network, tokens, balances, getQuote,
         <DialogHeader><DialogTitle>Swap di {network}</DialogTitle></DialogHeader>
         <div className="rounded-2xl bg-surface p-3">
           <div className="flex justify-between text-[11px] text-muted-foreground"><span>Dari</span>
-            <button onClick={() => setAmount(String(balances[fromSym] ?? 0))}>Saldo {balances[fromSym]?.toFixed(4) ?? "—"}</button></div>
+            <button onClick={() => setAmount(String(balances[fromSym] ?? 0))}>Balance {balances[fromSym]?.toFixed(4) ?? "—"}</button></div>
           <div className="mt-1 flex gap-2">
             <input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder="0.0" className="w-full bg-transparent text-2xl font-bold outline-none" />
             <select aria-label="Token asal" value={fromSym} onChange={(e) => setFrom(e.target.value)} className={sel}>{tokens.map((t) => <option key={t.sym}>{t.sym}</option>)}</select>
           </div>
         </div>
-        <button aria-label="Tukar arah" onClick={() => { setFrom(toSym); setTo(fromSym); }} className="mx-auto -my-2 rounded-full bg-primary/15 p-2 text-primary"><ArrowDownUp className="size-4" /></button>
+        <button aria-label="Switch direction" onClick={() => { setFrom(toSym); setTo(fromSym); }} className="mx-auto -my-2 rounded-full bg-primary/15 p-2 text-primary"><ArrowDownUp className="size-4" /></button>
         <div className="rounded-2xl bg-surface p-3">
           <div className="text-[11px] text-muted-foreground">Ke (perkiraan)</div>
           <div className="mt-1 flex gap-2">
             <p className="w-full text-2xl font-bold">{loading ? <Loader2 className="size-5 animate-spin" /> : quote ? quote.out.toFixed(6) : "0.0"}</p>
-            <select aria-label="Token tujuan" value={toSym} onChange={(e) => setTo(e.target.value)} className={sel}>{tokens.map((t) => <option key={t.sym}>{t.sym}</option>)}</select>
+            <select aria-label="Destination token" value={toSym} onChange={(e) => setTo(e.target.value)} className={sel}>{tokens.map((t) => <option key={t.sym}>{t.sym}</option>)}</select>
           </div>
         </div>
         {quote && <p className="text-xs text-muted-foreground">Rute terbaik via <b>{quote.via}</b> · slippage 0.5%</p>}
         {err && <p className="text-xs text-destructive">{err}</p>}
-        <Button disabled={!quote || busy} onClick={() => void go()}>{busy && <Loader2 className="size-4 animate-spin" />}Swap sekarang</Button>
+        <Button disabled={!quote || busy} onClick={() => void go()}>{busy && <Loader2 className="size-4 animate-spin" />}Swap now</Button>
       </DialogContent>
     </Dialog>
   );

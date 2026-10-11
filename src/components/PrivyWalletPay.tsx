@@ -14,13 +14,13 @@ function Inner({ label, step, onPay }: Props) {
   const { wallets, ready: wReady } = useWallets();
   const embedded = wallets.find((w) => w.walletClientType === "privy");
 
-  if (!ready || !wReady) return <Button className="w-full" disabled><Loader2 className="size-4 animate-spin" />Memuat dompet…</Button>;
-  if (!authenticated) return <Button className="w-full" variant="surface" onClick={login}>Hubungkan dompet Mindcaster</Button>;
+  if (!ready || !wReady) return <Button className="w-full" disabled><Loader2 className="size-4 animate-spin" />Loading wallet…</Button>;
+  if (!authenticated) return <Button className="w-full" variant="surface" onClick={login}>Connect Mindcaster wallet</Button>;
   if (!embedded) return <CreateEvmWallet />;
 
   return (
     <>
-      <p className="break-all text-center text-xs text-muted-foreground">Dompet Anda: <span className="font-mono">{embedded.address}</span></p>
+      <p className="break-all text-center text-xs text-muted-foreground">Your wallet: <span className="font-mono">{embedded.address}</span></p>
       <Button className="w-full" disabled={!!step} onClick={async () => onPay((await embedded.getEthereumProvider()) as Eth, embedded.address)}>
         {step ? <><Loader2 className="size-4 animate-spin" />{step}</> : label}
       </Button>

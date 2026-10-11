@@ -43,7 +43,7 @@ function HomeRoute() {
   ];
   const actions = (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-9" aria-label="Menu Home"><Menu className="size-5" /></Button></DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-9" aria-label="Home menu"><Menu className="size-5" /></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">
         <DropdownMenuItem asChild><Link to="/notifications"><Bell />{t("notifications")}</Link></DropdownMenuItem>
         <DropdownMenuSeparator />

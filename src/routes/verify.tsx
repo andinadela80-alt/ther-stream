@@ -66,11 +66,11 @@ function VerifyPage({ userId }: { userId: string }) {
 
   function payMetaMask() {
     const eth = (window as unknown as { ethereum?: Eth }).ethereum;
-    if (!eth) { toast.error("MetaMask tidak terdeteksi."); return; }
-    if (!wallet) { toast.error("Hubungkan dompet Mindcaster dulu."); return; }
+    if (!eth) { toast.error("MetaMask not detected."); return; }
+    if (!wallet) { toast.error("Connect your Mindcaster wallet first."); return; }
     void (async () => {
       const [from] = (await eth.request({ method: "eth_requestAccounts" })) as string[];
-      if (from?.toLowerCase() !== wallet.toLowerCase()) { toast.error("Gunakan dompet yang sama dengan profil Anda."); return; }
+      if (from?.toLowerCase() !== wallet.toLowerCase()) { toast.error("Use the same wallet as your profile."); return; }
       await pay(eth, from);
     })();
   }
@@ -78,7 +78,7 @@ function VerifyPage({ userId }: { userId: string }) {
   async function pay(eth: Eth, from: string): Promise<void> {
     const c = CHAINS[chain]; const t = c.tokens[token];
     try {
-      setStep("Menghubungkan dompet…");
+      setStep("Connecting wallet…");
       if (from.toLowerCase() !== wallet?.toLowerCase()) {
         const r = await syncFn({ data: { address: from } });
         setWallet(r.address);
@@ -89,7 +89,7 @@ function VerifyPage({ userId }: { userId: string }) {
       setStep("Confirm the payment in your wallet…");
       const value = BigInt(PLANS[plan].usd) * 10n ** BigInt(t.decimals);
       const txHash = (await eth.request({ method: "eth_sendTransaction", params: [{ from, to: t.address, data: encodeFunctionData({ abi: erc20Abi, functionName: "transfer", args: [PAY_TO, value] }) }] })) as string;
-      setStep("Menunggu konfirmasi blockchain…");
+      setStep("Waiting for blockchain confirmation…");
       let result;
       for (let i = 0; i < 3; i++) {
         try { result = await confirmFn({ data: { plan, chain, token, txHash } }); break; }
@@ -128,7 +128,7 @@ function VerifyPage({ userId }: { userId: string }) {
 
       <section className="glass-panel space-y-3 rounded-[24px] border border-surface/80 p-4">
         <div>
-          <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Jaringan</p>
+          <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Network</p>
           <div className="flex flex-wrap gap-2">{(Object.keys(CHAINS) as ChainId[]).map((c) => <Button key={c} size="sm" variant={chain === c ? "default" : "surface"} onClick={() => setChain(c)}>{CHAINS[c].name}</Button>)}</div>
         </div>
         <div>
@@ -136,11 +136,11 @@ function VerifyPage({ userId }: { userId: string }) {
           <div className="flex gap-2">{(["USDC", "USDT"] as TokenId[]).map((t) => <Button key={t} size="sm" variant={token === t ? "default" : "surface"} onClick={() => setToken(t)}>{t}</Button>)}</div>
         </div>
         {hydrated && (
-          <Suspense fallback={<Button className="w-full" disabled><Loader2 className="size-4 animate-spin" />Memuat dompet…</Button>}>
+          <Suspense fallback={<Button className="w-full" disabled><Loader2 className="size-4 animate-spin" />Loading wallet…</Button>}>
             <PrivyWalletPay label={`Bayar $${PLANS[plan].usd} ${token} di ${CHAINS[chain].name}`} step={step} onPay={pay} />
           </Suspense>
         )}
-        <p className="text-center text-[11px] text-muted-foreground">Isi saldo {token} ke alamat dompet di atas dulu. Punya MetaMask? <button type="button" className="underline" onClick={payMetaMask}>Bayar pakai MetaMask</button></p>
+        <p className="text-center text-[11px] text-muted-foreground">Fund the wallet above with {token} first. Have MetaMask? <button type="button" className="underline" onClick={payMetaMask}>Pay with MetaMask</button></p>
         <p className="text-center text-[11px] text-muted-foreground">Make sure you have a little native coin for gas fees.</p>
       </section>
     </>

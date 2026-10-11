@@ -86,7 +86,7 @@ export function DiscoverBanners() {
           >
             <button
               type="button"
-              aria-label="Tutup"
+              aria-label="Close"
               onClick={() => setShowSoon(false)}
               className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground hover:bg-surface/70"
             >

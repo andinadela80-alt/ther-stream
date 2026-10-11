@@ -244,7 +244,7 @@ export function Stories({ userId, onError }: { userId: string; onError: (m: stri
             <div className="absolute inset-x-0 bottom-0 z-20 mx-auto max-h-[60%] max-w-[600px] overflow-y-auto rounded-t-3xl bg-background p-4 text-foreground">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="font-semibold">Viewed by {viewers.length}</h3>
-                <button aria-label="Tutup daftar" onClick={() => setViewers(null)}><X className="size-5" /></button>
+                <button aria-label="Close list" onClick={() => setViewers(null)}><X className="size-5" /></button>
               </div>
               {viewers.length === 0 && <p className="text-sm text-muted-foreground">No viewers yet.</p>}
               {viewers.map((v) => (
