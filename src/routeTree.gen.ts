@@ -21,6 +21,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as MediaSplatRouteImport } from './routes/media.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const WalletRoute = WalletRouteImport.update({
   path: '/wallet',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MediaSplatRoute = MediaSplatRouteImport.update({
+  id: '/media/$',
+  path: '/media/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof SupportRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
+  '/media/$': typeof MediaSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/support': typeof SupportRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
+  '/media/$': typeof MediaSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/support': typeof SupportRoute
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
+  '/media/$': typeof MediaSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/verify'
     | '/wallet'
+    | '/media/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/verify'
     | '/wallet'
+    | '/media/$'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/verify'
     | '/wallet'
+    | '/media/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   VerifyRoute: typeof VerifyRoute
   WalletRoute: typeof WalletRoute
+  MediaSplatRoute: typeof MediaSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WalletRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/media/$': {
+      id: '/media/$'
+      path: '/media/$'
+      fullPath: '/media/$'
+      preLoaderRoute: typeof MediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   VerifyRoute: VerifyRoute,
   WalletRoute: WalletRoute,
+  MediaSplatRoute: MediaSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

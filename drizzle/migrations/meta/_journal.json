@@ -8,6 +8,13 @@
       "when": 1791458946215,
       "tag": "0000_reserved_username_admin_bypass",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791720076688,
+      "tag": "0001_media_proxy_urls",
+      "breakpoints": true
     }
   ]
 }

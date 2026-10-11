@@ -1,0 +1,4 @@
+UPDATE public.profiles SET avatar_url = regexp_replace(avatar_url, '^https://pub-[a-z0-9]+\.r2\.dev/', '/media/') WHERE avatar_url ~ '^https://pub-[a-z0-9]+\.r2\.dev/';
+UPDATE public.posts SET image_url = regexp_replace(image_url, '^https://pub-[a-z0-9]+\.r2\.dev/', '/media/') WHERE image_url ~ '^https://pub-[a-z0-9]+\.r2\.dev/';
+UPDATE public.stories SET media_url = regexp_replace(media_url, '^https://pub-[a-z0-9]+\.r2\.dev/', '/media/') WHERE media_url ~ '^https://pub-[a-z0-9]+\.r2\.dev/';
+UPDATE public.stories SET music_url = regexp_replace(music_url, '^https://pub-[a-z0-9]+\.r2\.dev/', '/media/') WHERE music_url ~ '^https://pub-[a-z0-9]+\.r2\.dev/';
