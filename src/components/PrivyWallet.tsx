@@ -103,7 +103,7 @@ function Inner() {
         out[t.sym] = Number(formatUnits(v, t.decimals));
       }
       setBal(out);
-    } catch { toast.error("Gagal memuat saldo."); } finally { setLoading(false); }
+    } catch { toast.error("Failed to load balance."); } finally { setLoading(false); }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [w, netKey, ALL_KEY]);
 
@@ -119,7 +119,7 @@ function Inner() {
   }
   function addToken() {
     if (!preview) return;
-    if (ALL.slice(0, BASE.tokens.length + 1 + custom.length).some((t) => t.sym === preview.sym || t.address?.toLowerCase() === preview.address?.toLowerCase())) { toast.error("Token sudah ada di daftar."); return; }
+    if (ALL.slice(0, BASE.tokens.length + 1 + custom.length).some((t) => t.sym === preview.sym || t.address?.toLowerCase() === preview.address?.toLowerCase())) { toast.error("Token is already in the list."); return; }
     const next = [...custom, preview];
     localStorage.setItem(customKey(netKey), JSON.stringify(next)); setCustom(next);
     setAddOpen(false); setCa(""); setPreview(null); toast.success(`${preview.sym} ditambahkan`);
@@ -132,23 +132,23 @@ function Inner() {
   useEffect(() => { if (w) void QRCode.toDataURL(w.address, { margin: 1, width: 240 }).then(setQr); }, [w]);
 
   const selector = (
-    <select aria-label="Jaringan" value={netKey} onChange={(e) => setNetKey(e.target.value)} className="rounded-full border-0 bg-primary/15 px-2.5 py-1 text-[11px] font-bold text-primary outline-none">
+    <select aria-label="Network" value={netKey} onChange={(e) => setNetKey(e.target.value)} className="rounded-full border-0 bg-primary/15 px-2.5 py-1 text-[11px] font-bold text-primary outline-none">
       {NETS.map((n) => <option key={n.key} value={n.key}>{n.name}</option>)}
       <option value="solana">Solana</option>
     </select>
   );
   if (!ready || !wReady) return <p className="flex justify-center py-10"><Loader2 className="size-6 animate-spin" /></p>;
-  if (!authenticated) return <Button className="w-full" onClick={login}>Hubungkan dompet Mindcaster</Button>;
+  if (!authenticated) return <Button className="w-full" onClick={login}>Connect Mindcaster wallet</Button>;
   if (netKey === "solana") return <SolanaPanel selector={selector} />;
   if (!w) return <CreateEvmWallet />;
 
   async function send(): Promise<void> {
     if (!w) return;
-    if (!isAddress(to)) { toast.error("Alamat tujuan tidak valid."); return; }
+    if (!isAddress(to)) { toast.error("Invalid recipient address."); return; }
     const t = TOKENS.find((x) => x.sym === sym)!;
     let value: bigint;
-    try { value = parseUnits(amount, t.decimals); } catch { { toast.error("Nominal tidak valid."); return; } }
-    if (value <= 0n) { toast.error("Nominal tidak valid."); return; }
+    try { value = parseUnits(amount, t.decimals); } catch { { toast.error("Invalid amount."); return; } }
+    if (value <= 0n) { toast.error("Invalid amount."); return; }
     setSending(true);
     try {
       await w.switchChain(BASE.id);
@@ -168,17 +168,17 @@ function Inner() {
       <section className="glass-panel rounded-[24px] border border-surface/80 p-5">
         <div className="flex items-center justify-between">
           {selector}
-          <button onClick={() => { void navigator.clipboard.writeText(w.address); toast.success("Alamat disalin"); }} className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground"><Copy className="size-3.5" />{short}</button>
+          <button onClick={() => { void navigator.clipboard.writeText(w.address); toast.success("Address copied"); }} className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground"><Copy className="size-3.5" />{short}</button>
         </div>
         <div className="mt-5 text-center">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Total saldo</p>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Total balance</p>
           <p className="mt-1 text-4xl font-bold">{usd(TOKENS.reduce((a, t) => a + (bal[t.sym] ?? 0) * (prices[t.sym]?.usd ?? 0), 0))}</p>
         </div>
         <ul className="mt-5 space-y-2">
-          {TOKENS.map((t) => <div key={t.sym} onContextMenu={(e) => { if (custom.includes(t)) { e.preventDefault(); if (confirm(`Hapus ${t.sym} dari daftar?`)) removeToken(t.address); } }}><TokenRow sym={t.sym} amount={bal[t.sym]} price={prices[t.sym]} network={custom.includes(t) ? `${BASE.name} · custom` : BASE.name} /></div>)}
+          {TOKENS.map((t) => <div key={t.sym} onContextMenu={(e) => { if (custom.includes(t)) { e.preventDefault(); if (confirm(`Remove ${t.sym} from the list?`)) removeToken(t.address); } }}><TokenRow sym={t.sym} amount={bal[t.sym]} price={prices[t.sym]} network={custom.includes(t) ? `${BASE.name} · custom` : BASE.name} /></div>)}
           <li className="flex items-center justify-between rounded-2xl bg-surface/40 px-3 py-3 text-sm text-muted-foreground"><span className="font-semibold">$MIND</span><span className="text-[11px] font-bold">SOON</span></li>
         </ul>
-        <button onClick={() => setAddOpen(true)} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border/60 py-2.5 text-xs font-semibold text-muted-foreground hover:text-primary"><Plus className="size-3.5" />Tambah token (smart contract)</button>
+        <button onClick={() => setAddOpen(true)} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border/60 py-2.5 text-xs font-semibold text-muted-foreground hover:text-primary"><Plus className="size-3.5" />Add token (smart contract)</button>
         <div className="mt-5 grid grid-cols-3 gap-2">
           <Button variant="surface" onClick={() => setOpen("receive")}><ArrowDownLeft className="size-4" />Receive</Button>
           <Button variant="surface" onClick={() => setOpen("send")}><ArrowUpRight className="size-4" />Send</Button>
@@ -201,7 +201,7 @@ function Inner() {
             const spender = raw.estimate.approvalAddress as `0x${string}`;
             const allowance = await rpc(BASE.rpc, "eth_call", [{ to: f.id, data: encodeFunctionData({ abi: erc20Abi, functionName: "allowance", args: [w.address as `0x${string}`, spender] }) }, "latest"]);
             if (allowance < a) {
-              toast.message("Setujui token dulu, lalu konfirmasi swap.");
+              toast.message("Approve the token first, then confirm the swap.");
               await eth.request({ method: "eth_sendTransaction", params: [{ from: w.address, to: f.id, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [spender, a] }) }] });
               await new Promise((r) => setTimeout(r, 4000));
             }
@@ -213,22 +213,22 @@ function Inner() {
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Tambah token di {BASE.name}</DialogTitle></DialogHeader>
-          <input value={ca} onChange={(e) => void checkCa(e.target.value.trim())} placeholder="Alamat kontrak 0x…" className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 font-mono text-sm outline-none focus:border-primary" />
+          <DialogHeader><DialogTitle>Add token on {BASE.name}</DialogTitle></DialogHeader>
+          <input value={ca} onChange={(e) => void checkCa(e.target.value.trim())} placeholder="Contract address 0x…" className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 font-mono text-sm outline-none focus:border-primary" />
           {checking && <p className="flex justify-center"><Loader2 className="size-4 animate-spin" /></p>}
           {preview && <p className="rounded-xl bg-surface/60 p-3 text-sm"><b>{preview.sym}</b> · {preview.decimals} desimal</p>}
-          <p className="text-xs text-muted-foreground">Token dengan saldo dari daftar populer muncul otomatis. Tahan/klik kanan token custom untuk menghapus.</p>
-          <Button disabled={!preview} onClick={addToken}><Plus className="size-4" />Tambahkan ke daftar</Button>
+          <p className="text-xs text-muted-foreground">Popular tokens with a balance appear automatically. Long-press/right-click a custom token to remove it.</p>
+          <Button disabled={!preview} onClick={addToken}><Plus className="size-4" />Add to list</Button>
         </DialogContent>
       </Dialog>
 
       <Dialog open={open === "receive"} onOpenChange={(o) => !o && setOpen(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>Receive di {BASE.name}</DialogTitle></DialogHeader>
-          {qr && <img src={qr} alt="QR alamat dompet" className="mx-auto size-56 rounded-xl bg-card p-2" />}
+          {qr && <img src={qr} alt="Wallet address QR" className="mx-auto size-56 rounded-xl bg-card p-2" />}
           <p className="break-all text-center font-mono text-xs">{w.address}</p>
-          <p className="text-center text-xs text-muted-foreground">Kirim hanya aset jaringan {BASE.name} ke alamat ini.</p>
-          <Button onClick={() => { void navigator.clipboard.writeText(w.address); toast.success("Alamat disalin"); }}><Copy className="size-4" />Salin alamat</Button>
+          <p className="text-center text-xs text-muted-foreground">Only send {BASE.name} network assets to this address.</p>
+          <Button onClick={() => { void navigator.clipboard.writeText(w.address); toast.success("Address copied"); }}><Copy className="size-4" />Copy address</Button>
         </DialogContent>
       </Dialog>
 
@@ -236,9 +236,9 @@ function Inner() {
         <DialogContent className="max-w-sm">
           <DialogHeader><DialogTitle>Send di {BASE.name}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-3 gap-2">{TOKENS.map((t) => <Button key={t.sym} size="sm" variant={sym === t.sym ? "default" : "surface"} onClick={() => setSym(t.sym)}>{t.sym}</Button>)}</div>
-          <input value={to} onChange={(e) => setTo(e.target.value.trim())} placeholder="Alamat tujuan 0x…" className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 font-mono text-sm outline-none focus:border-primary" />
-          <input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder={`Nominal (saldo ${bal[sym] ?? 0})`} className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
-          <p className="text-xs text-muted-foreground">Butuh sedikit {BASE.native} di {BASE.name} untuk biaya jaringan.</p>
+          <input value={to} onChange={(e) => setTo(e.target.value.trim())} placeholder="Recipient address 0x…" className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 font-mono text-sm outline-none focus:border-primary" />
+          <input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder={`Amount (balance ${bal[sym] ?? 0})`} className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
+          <p className="text-xs text-muted-foreground">You need a little {BASE.native} on {BASE.name} for network fees.</p>
           <Button disabled={sending || !to || !amount} onClick={() => void send()}>{sending ? <Loader2 className="size-4 animate-spin" /> : <ArrowUpRight className="size-4" />}Kirim {sym}</Button>
         </DialogContent>
       </Dialog>

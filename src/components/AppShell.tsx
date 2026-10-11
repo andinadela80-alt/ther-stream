@@ -80,8 +80,8 @@ export function AppShell({ title, actions, children }: { title: string; actions?
               <Link to="/profile" search={{}} aria-label="Buka profil saya" className="rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
                 <Avatar profile={profile} size={34} />
               </Link>
-              {title === "Home" ? <BrandLogo size={34} className="pointer-events-none absolute left-1/2 -translate-x-1/2" /> : <h1 className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate font-display text-base font-semibold">{title === "Discover" ? t("discover") : title === "Notifikasi" ? t("notifications") : title === "Pesan" ? t("messages") : title === "Profil" ? t("profile") : title}</h1>}
-              <div className="relative ml-auto">{actions}{actions && unread > 0 && <span aria-label="Ada notifikasi baru" className="pointer-events-none absolute right-1 top-1 size-2.5 rounded-full bg-destructive ring-2 ring-background" />}</div>
+              {title === "Home" ? <BrandLogo size={34} className="pointer-events-none absolute left-1/2 -translate-x-1/2" /> : <h1 className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate font-display text-base font-semibold">{title === "Discover" ? t("discover") : title === "Notifications" ? t("notifications") : title === "Messages" ? t("messages") : title === "Profile" ? t("profile") : title}</h1>}
+              <div className="relative ml-auto">{actions}{actions && unread > 0 && <span aria-label="New notifications" className="pointer-events-none absolute right-1 top-1 size-2.5 rounded-full bg-destructive ring-2 ring-background" />}</div>
             </div>
           </header>
           <main className="relative z-10 mx-auto w-full max-w-[600px] space-y-3 px-3 pb-28 pt-4 sm:px-4">{children(user)}</main>
