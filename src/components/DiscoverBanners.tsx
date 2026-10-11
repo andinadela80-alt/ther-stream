@@ -8,7 +8,7 @@ import bannerMind from "@/assets/banner-buy-mind-pons.png.asset.json";
 type Soon = { emoji: string; title: string; text: string };
 // Set `href` on the $MIND banner once the PONS link is ready.
 const BANNERS: { src: string; alt: string; href?: string; soon?: Soon }[] = [
-  { src: bannerMind.url, alt: "Buy $MIND on PONS", soon: { emoji: "🚀", title: "Soon", text: "$MIND is launching on PONS. The buy link opens here soon — stay tuned!" } },
+  { src: bannerMind.url, alt: "Buy $MIND on PONS", href: "https://www.ponsfamily.com/launchpad/0x7d249d242a02e19a10b367a2fa9407cb03bee1ac" },
   { src: bannerOgNft.url, alt: "Mindcaster — Get OG NFT", soon: { emoji: "👑", title: "Coming Soon", text: "Mindcaster OG NFT isn't open yet. Stay tuned — the first OGs will get special perks." } },
   { src: bannerEnterMind.url, alt: "Mindcaster — Enter the Mind. Discover. Connect. Cast." },
 ];
