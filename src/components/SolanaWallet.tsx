@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { useCreateWallet, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
+import { useCreateWallet, useExportWallet, useSignAndSendTransaction, useWallets } from "@privy-io/react-auth/solana";
 import { address, appendTransactionMessageInstruction, compileTransaction, createNoopSigner, createSolanaRpc, createTransactionMessage, getTransactionEncoder, isAddress, lamports, pipe, setTransactionMessageFeePayer, setTransactionMessageLifetimeUsingBlockhash } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Copy, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Copy, KeyRound, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 // @ts-expect-error qrcode ships without types
 import QRCode from "qrcode";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ const rpc = createSolanaRpc(SOL_RPC);
 export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
   const { wallets, ready } = useWallets();
   const { createWallet } = useCreateWallet();
+  const { exportWallet } = useExportWallet();
   const { signAndSendTransaction } = useSignAndSendTransaction();
   const w = wallets.find((x) => x.standardWallet?.name === "Privy") ?? wallets[0];
   const [bal, setBal] = useState<{ SOL?: number; USDC?: number }>({});
@@ -109,6 +110,7 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
         </div>
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
           <button onClick={() => void load()} className="flex items-center gap-1"><RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />Refresh</button>
+          <button onClick={() => void exportWallet({ address: w.address }).catch((e: Error) => toast.error(e.message.slice(0, 140)))} className="flex items-center gap-1"><KeyRound className="size-3.5" />Export key</button>
           <a href={`https://solscan.io/account/${w.address}`} target="_blank" rel="noreferrer" className="flex items-center gap-1">Solscan<ExternalLink className="size-3.5" /></a>
         </div>
       </section>

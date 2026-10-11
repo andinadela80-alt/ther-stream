@@ -1,7 +1,7 @@
 import { PrivyProvider, usePrivy, useWallets } from "@privy-io/react-auth";
 import { CreateEvmWallet } from "@/components/CreateEvmWallet";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Copy, ExternalLink, Loader2, RefreshCw } from "lucide-react";
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Copy, KeyRound, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 // @ts-expect-error qrcode ships without types
 import QRCode from "qrcode";
 import { decodeFunctionResult, defineChain, encodeFunctionData, erc20Abi, formatUnits, isAddress, parseUnits } from "viem";
@@ -65,7 +65,7 @@ async function rpc(url: string, method: string, params: unknown[]) {
 }
 
 function Inner() {
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login, exportWallet } = usePrivy();
   const { wallets, ready: wReady } = useWallets();
   const w = wallets.find((x) => x.walletClientType === "privy");
   const [netKey, setNetKey] = useState("base");
@@ -186,6 +186,7 @@ function Inner() {
         </div>
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
           <button onClick={() => void load()} className="flex items-center gap-1"><RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />Refresh</button>
+          <button onClick={() => void exportWallet({ address: w.address }).catch((e: Error) => toast.error(e.message.slice(0, 140)))} className="flex items-center gap-1"><KeyRound className="size-3.5" />Export key</button>
           <a href={`${BASE.explorer}/address/${w.address}`} target="_blank" rel="noreferrer" className="flex items-center gap-1">{BASE.explorerName}<ExternalLink className="size-3.5" /></a>
         </div>
       </section>
