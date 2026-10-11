@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { normalize, POST_SELECT, type Post } from "@/lib/social";
 
 export const Route = createFileRoute("/cashtag")({
+  staticData: { sitemap: false },
   validateSearch: zodValidator(z.object({ s: fallback(z.string(), "").default("") })),
   head: () => ({
     meta: [

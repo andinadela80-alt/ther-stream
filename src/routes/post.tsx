@@ -7,6 +7,7 @@ import { PostCard } from "@/components/PostCard";
 import { fetchPosts, type Post } from "@/lib/social";
 
 export const Route = createFileRoute("/post")({
+  staticData: { sitemap: false },
   validateSearch: z.object({ id: z.string().uuid().optional() }),
   head: () => ({
     meta: [

@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 const PrivyWallet = lazy(() => (import.meta.env.SSR ? Promise.resolve({ default: () => null }) : import("@/components/PrivyWallet")) as Promise<typeof import("@/components/PrivyWallet")>);
 
 export const Route = createFileRoute("/wallet")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Wallet — Mindcaster" },

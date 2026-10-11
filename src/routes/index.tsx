@@ -19,6 +19,7 @@ import { usePreferences, type LanguagePreference } from "@/lib/preferences";
 import { fetchPosts, type Post } from "@/lib/social";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Mindcaster — Where Ideas Become Onchain" },

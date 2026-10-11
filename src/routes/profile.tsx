@@ -18,6 +18,7 @@ import { profileLink, shareLink } from "@/lib/share";
 import { displayName, fetchPosts, handle, joined, resizeImage, short, type Post, type Profile } from "@/lib/social";
 
 export const Route = createFileRoute("/profile")({
+  staticData: { sitemap: false },
   validateSearch: z.object({ id: z.string().uuid().optional(), u: z.string().max(40).optional() }),
   head: () => ({
     meta: [

@@ -16,6 +16,7 @@ import { confirmVerificationPayment, getPromoSlots } from "@/lib/verification.fu
 import { syncPrivyWallet } from "@/lib/privy-wallet.functions";
 
 export const Route = createFileRoute("/verify")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Verify Account — Mindcaster" },

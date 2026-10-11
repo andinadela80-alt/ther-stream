@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { displayName, fetchPosts, handle, type Post, type Profile } from "@/lib/social";
 
 export const Route = createFileRoute("/discover")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Discover — Mindcaster" },
