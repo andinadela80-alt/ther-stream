@@ -114,7 +114,7 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
       </section>
 
       <SwapDialog open={open === "swap"} onClose={() => setOpen(null)} network="Solana" balances={bal}
-        tokens={[{ sym: "SOL", id: SOL_MINT, decimals: 9 }, { sym: "USDC", id: USDC_MINT, decimals: 6 }]}
+        tokens={[{ sym: "SOL", id: SOL_MINT, decimals: 9 }, { sym: "USDC", id: USDC_MINT, decimals: 6 }, { sym: "USDT", id: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", decimals: 6 }]}
         getQuote={jupQuote}
         execute={async (q) => {
           const tx = await jupSwapTx(q.raw, w.address);
