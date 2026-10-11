@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 // Serves R2 media through our own domain so ISPs blocking *.r2.dev don't break images.
 export const Route = createFileRoute("/media/$")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async ({ params }) => {
