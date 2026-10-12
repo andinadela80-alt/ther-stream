@@ -15,7 +15,7 @@ export async function shareLink(url: string, title = "Mindcaster") {
   }
   try {
     await navigator.clipboard.writeText(url);
-    toast.success("Link disalin", { description: url });
+    toast.success("Link copied", { description: url });
   } catch {
     toast(url);
   }

@@ -28,7 +28,7 @@ type Row = Record<string, unknown>;
 const TABS: { id: Tab; label: string }[] = [
   { id: "alerts", label: "Live Feed" },
   { id: "thesis", label: "Thesis" },
-  { id: "leaderboard", label: "PnL 7 Hari" },
+  { id: "leaderboard", label: "7D PnL" },
 ];
 
 function list(json: unknown): Row[] {

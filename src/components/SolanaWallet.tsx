@@ -82,7 +82,7 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
       );
       const bytes = new Uint8Array(getTransactionEncoder().encode(compileTransaction(msg)));
       await signAndSendTransaction({ transaction: bytes, wallet: w, chain: "solana:mainnet" });
-      toast.success("SOL terkirim!");
+      toast.success("SOL sent!");
       setOpen(null); setTo(""); setAmount(""); setTimeout(() => void load(), 4000);
     } catch (e) { toast.error((e as Error).message.slice(0, 140)); } finally { setSending(false); }
   }
@@ -139,7 +139,7 @@ export function SolanaPanel({ selector }: { selector: React.ReactNode }) {
           <DialogHeader><DialogTitle>Send SOL</DialogTitle></DialogHeader>
           <input value={to} onChange={(e) => setTo(e.target.value.trim())} placeholder="Recipient Solana address" className="w-full rounded-xl bg-surface px-3 py-2.5 font-mono text-xs outline-none" />
           <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" placeholder={`SOL amount (balance ${bal.SOL ?? "—"})`} className="w-full rounded-xl bg-surface px-3 py-2.5 text-sm outline-none" />
-          <Button disabled={sending} onClick={() => void send()}>{sending && <Loader2 className="size-4 animate-spin" />}Kirim</Button>
+          <Button disabled={sending} onClick={() => void send()}>{sending && <Loader2 className="size-4 animate-spin" />}Send</Button>
         </DialogContent>
       </Dialog>
     </>

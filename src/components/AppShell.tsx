@@ -77,7 +77,7 @@ export function AppShell({ title, actions, children }: { title: string; actions?
         <FollowsProvider userId={user.id}>
           <header className="glass-panel sticky top-0 z-30 border-b border-surface/80">
             <div className="relative mx-auto flex h-14 max-w-[600px] items-center justify-between px-4">
-              <Link to="/profile" search={{}} aria-label="Buka profil saya" className="rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
+              <Link to="/profile" search={{}} aria-label="Open my profile" className="rounded-full outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-ring">
                 <Avatar profile={profile} size={34} />
               </Link>
               {title === "Home" ? <><h1 className="sr-only">Home — Mindcaster Feed</h1><BrandLogo size={34} className="pointer-events-none absolute left-1/2 -translate-x-1/2" /></> : <h1 className="absolute left-1/2 max-w-[55%] -translate-x-1/2 truncate font-display text-base font-semibold">{title === "Discover" ? t("discover") : title === "Notifications" ? t("notifications") : title === "Messages" ? t("messages") : title === "Profile" ? t("profile") : title}</h1>}

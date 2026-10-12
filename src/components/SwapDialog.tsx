@@ -51,7 +51,7 @@ export function SwapDialog({ open, onClose, network, tokens, balances, getQuote,
   async function go() {
     if (!quote || !from) return;
     setBusy(true);
-    try { await execute(quote, from, toUnits(amount, from.decimals)); toast.success("Swap terkirim!"); setAmount(""); onClose(); }
+    try { await execute(quote, from, toUnits(amount, from.decimals)); toast.success("Swap submitted!"); setAmount(""); onClose(); }
     catch (e) { toast.error((e as Error).message.slice(0, 140)); }
     finally { setBusy(false); }
   }

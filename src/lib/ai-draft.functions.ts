@@ -32,7 +32,7 @@ export const generatePostDraft = createServerFn({ method: "POST" })
     const text = (await result.text).trim();
     if (!text) {
       const status = (failure as { statusCode?: number } | undefined)?.statusCode;
-      if (status === 429) throw new Error("Terlalu banyak permintaan, coba lagi sebentar.");
+      if (status === 429) throw new Error("Too many requests, please try again shortly.");
       if (status === 402) throw new Error("Kredit AI habis.");
       throw new Error("AI couldn't create a draft right now.");
     }
