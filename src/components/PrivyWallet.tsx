@@ -115,7 +115,7 @@ function Inner() {
       const sym = decodeFunctionResult({ abi: erc20Abi, functionName: "symbol", data: await rpcRaw(BASE.rpc, v, encodeFunctionData({ abi: erc20Abi, functionName: "symbol" })) });
       const dec = decodeFunctionResult({ abi: erc20Abi, functionName: "decimals", data: await rpcRaw(BASE.rpc, v, encodeFunctionData({ abi: erc20Abi, functionName: "decimals" })) });
       setPreview({ sym: String(sym), address: v as `0x${string}`, decimals: Number(dec) });
-    } catch { toast.error(`Bukan token ERC20 di ${BASE.name}.`); } finally { setChecking(false); }
+    } catch { toast.error(`Not an ERC20 token on ${BASE.name}.`); } finally { setChecking(false); }
   }
   function addToken() {
     if (!preview) return;
@@ -157,7 +157,7 @@ function Inner() {
         ? { from: w.address, to: t.address, data: encodeFunctionData({ abi: erc20Abi, functionName: "transfer", args: [to, value] }) }
         : { from: w.address, to, value: `0x${value.toString(16)}` };
       const hash = (await eth.request({ method: "eth_sendTransaction", params: [tx] })) as string;
-      toast.success("Terkirim!", { action: { label: "Lihat", onClick: () => window.open(`${BASE.explorer}/tx/${hash}`, "_blank") } });
+      toast.success("Sent!", { action: { label: "View", onClick: () => window.open(`${BASE.explorer}/tx/${hash}`, "_blank") } });
       setOpen(null); setTo(""); setAmount(""); setTimeout(() => void load(), 4000);
     } catch (e) { toast.error((e as Error).message.slice(0, 140)); } finally { setSending(false); }
   }
@@ -240,7 +240,7 @@ function Inner() {
           <input value={to} onChange={(e) => setTo(e.target.value.trim())} placeholder="Recipient address 0x…" className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 font-mono text-sm outline-none focus:border-primary" />
           <input value={amount} onChange={(e) => setAmount(e.target.value.replace(",", "."))} inputMode="decimal" placeholder={`Amount (balance ${bal[sym] ?? 0})`} className="h-10 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
           <p className="text-xs text-muted-foreground">You need a little {BASE.native} on {BASE.name} for network fees.</p>
-          <Button disabled={sending || !to || !amount} onClick={() => void send()}>{sending ? <Loader2 className="size-4 animate-spin" /> : <ArrowUpRight className="size-4" />}Kirim {sym}</Button>
+          <Button disabled={sending || !to || !amount} onClick={() => void send()}>{sending ? <Loader2 className="size-4 animate-spin" /> : <ArrowUpRight className="size-4" />}Send {sym}</Button>
         </DialogContent>
       </Dialog>
     </>

@@ -37,7 +37,7 @@ export const confirmVerificationPayment = createServerFn({ method: "POST" })
 
     const { data: badge } = await supabaseAdmin.from("verified_badges").select("*").eq("user_id", context.userId).maybeSingle();
     if (data.plan === "promo") {
-      if (badge?.promo_used) throw new Error("Promo hanya bisa dipakai sekali.");
+      if (badge?.promo_used) throw new Error("This promo can only be used once.");
       const { count } = await supabaseAdmin.from("verified_badges").select("user_id", { count: "exact", head: true }).eq("promo_used", true);
       if ((count ?? 0) >= PROMO_LIMIT) throw new Error("The promo quota is sold out.");
     }
