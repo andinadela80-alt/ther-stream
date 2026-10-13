@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Compass, Home, Mail, Wallet } from "lucide-react";
+import { Compass, Home, Mail, Plus, Wallet } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 import signalBackground from "@/assets/ponscaster-signal-bg.jpg";
@@ -85,6 +85,21 @@ export function AppShell({ title, actions, children }: { title: string; actions?
             </div>
           </header>
           <main className="relative z-10 mx-auto w-full max-w-[600px] space-y-3 px-3 pb-28 pt-4 sm:px-4">{children(user)}</main>
+          {(title === "Home" || title === "Discover" || title === "Profile") && (
+            <button
+              type="button"
+              aria-label="New post"
+              onClick={() => {
+                const box = document.getElementById("composer") as HTMLTextAreaElement | null;
+                if (box) { box.scrollIntoView({ behavior: "smooth", block: "center" }); box.focus(); return; }
+                sessionStorage.setItem("mc-compose", "1");
+                window.location.assign("/");
+              }}
+              className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-[max(1rem,calc(50%-300px+1rem))] z-40 grid size-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-signal transition hover:scale-105 active:scale-95"
+            >
+              <Plus className="size-7" />
+            </button>
+          )}
           <nav aria-label="Menu utama" className="glass-panel fixed inset-x-0 bottom-0 z-40 border-t border-surface/80 pb-[env(safe-area-inset-bottom)]">
             <ul className="mx-auto grid h-16 max-w-[600px] grid-cols-5">
               {NAV.map(({ to, label, ...rest }) => {

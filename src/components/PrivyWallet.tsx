@@ -176,7 +176,6 @@ function Inner() {
         </div>
         <ul className="mt-5 space-y-2">
           {TOKENS.map((t) => <div key={t.sym} onContextMenu={(e) => { if (custom.includes(t)) { e.preventDefault(); if (confirm(`Remove ${t.sym} from the list?`)) removeToken(t.address); } }}><TokenRow sym={t.sym} amount={bal[t.sym]} price={prices[t.sym]} network={custom.includes(t) ? `${BASE.name} · custom` : BASE.name} /></div>)}
-          <li className="flex items-center justify-between rounded-2xl bg-surface/40 px-3 py-3 text-sm text-muted-foreground"><span className="font-semibold">$MIND</span><span className="text-[11px] font-bold">SOON</span></li>
         </ul>
         <button onClick={() => setAddOpen(true)} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border/60 py-2.5 text-xs font-semibold text-muted-foreground hover:text-primary"><Plus className="size-3.5" />Add token (smart contract)</button>
         <div className="mt-5 grid grid-cols-3 gap-2">

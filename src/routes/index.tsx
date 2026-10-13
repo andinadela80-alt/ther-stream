@@ -87,6 +87,11 @@ function HomeFeed({ user, view, onHome }: { user: User; view: HomeView; onHome: 
   }, [user.id, view]);
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { const d = sessionStorage.getItem("mc-draft"); if (d) { setDraft(d.slice(0, 500)); sessionStorage.removeItem("mc-draft"); } }, []);
+  useEffect(() => {
+    if (view !== "home" || !sessionStorage.getItem("mc-compose")) return;
+    sessionStorage.removeItem("mc-compose");
+    setTimeout(() => { const b = document.getElementById("composer"); b?.scrollIntoView({ block: "center" }); b?.focus(); }, 300);
+  }, [view]);
 
   async function createPost(e: FormEvent) {
     e.preventDefault();
@@ -118,7 +123,7 @@ function HomeFeed({ user, view, onHome }: { user: User; view: HomeView; onHome: 
       ) : <>
       <Stories userId={user.id} onError={setError} />
       <form onSubmit={createPost} className="glass-panel rounded-[24px] border border-surface/80 p-4">
-        <textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={500} rows={3} placeholder={t("whatsHappening")} className="w-full resize-none rounded-xl border border-border/60 bg-surface/75 p-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25" />
+        <textarea id="composer" value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={500} rows={3} placeholder={t("whatsHappening")} className="w-full resize-none rounded-xl border border-border/60 bg-surface/75 p-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/25" />
         <div className="mt-2 flex gap-2">
           <input value={idea} onChange={(e) => setIdea(e.target.value)} maxLength={300} placeholder="Quick idea → AI draft" className="h-9 min-w-0 flex-1 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
           <Button type="button" size="sm" variant="surface" disabled={drafting || idea.trim().length < 3} onClick={draftWithAi}>{drafting ? <Loader2 className="size-4 animate-spin" /> : <Wand2 className="size-4" />}AI Draft</Button>
