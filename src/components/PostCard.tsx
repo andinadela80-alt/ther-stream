@@ -20,7 +20,6 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
   const navigate = useNavigate();
   const { following, pending, toggleFollow } = useFollows();
   const { t } = usePreferences();
-  const [showComments, setShowComments] = useState(detail);
   const [showReact, setShowReact] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pressOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -191,7 +190,7 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
         <Button variant="ghost" size="icon" className={bookmarked ? "text-primary" : ""} onClick={toggleBookmark} aria-pressed={bookmarked} aria-label={bookmarked ? t("removeBookmark") : t("bookmark")}><Bookmark className={`size-4 ${bookmarked ? "fill-primary" : ""}`} /></Button>
       </div>
 
-      {(detail || showComments) && (
+      {detail && (
         <div className="mt-2 space-y-2.5 border-t border-border/60 pt-3">
           {detail && <h2 className="font-display text-sm font-semibold">Replies · {p.post_comments.length}</h2>}
           {p.post_comments.map((c) => (
