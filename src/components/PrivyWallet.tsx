@@ -1,4 +1,4 @@
-import { PrivyProvider, usePrivy, useWallets } from "@privy-io/react-auth";
+import { PrivyProvider, usePrivy, useSendTransaction, useWallets } from "@privy-io/react-auth";
 import { CreateEvmWallet } from "@/components/CreateEvmWallet";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, Copy, KeyRound, ExternalLink, Loader2, RefreshCw } from "lucide-react";
@@ -26,7 +26,7 @@ const NETS: Net[] = [
   { key: "base", id: 8453, name: "Base", native: "ETH", rpc: CHAINS.base.rpc, explorer: CHAINS.base.explorer, explorerName: "BaseScan", swap: "https://app.uniswap.org/swap?chain=base",
     tokens: [{ sym: "USDC", ...CHAINS.base.tokens.USDC }, { sym: "USDT", ...CHAINS.base.tokens.USDT }] },
   { key: "robinhood", id: 4663, name: "Robinhood", native: "ETH", rpc: "https://rpc.mainnet.chain.robinhood.com", explorer: "https://robinhoodchain.blockscout.com", explorerName: "Blockscout", swap: "https://www.ponsfamily.com",
-    tokens: [{ sym: "PONS", address: "0x39dbed3a2bd333467115de45665cc57f813c4571", decimals: 18 }] },
+    tokens: [{ sym: "PONS", address: "0x39dbed3a2bd333467115de45665cc57f813c4571", decimals: 18 }, { sym: "MIND", address: "0x7d249d242a02e19a10b367a2fa9407cb03bee1ac", decimals: 18 }] },
   { key: "ethereum", id: 1, name: "Ethereum", native: "ETH", rpc: "https://ethereum-rpc.publicnode.com", explorer: "https://etherscan.io", explorerName: "Etherscan", swap: "https://app.uniswap.org/swap?chain=mainnet",
     tokens: [{ sym: "USDC", address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", decimals: 6 }, { sym: "USDT", address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals: 6 }] },
   { key: "bnb", id: 56, name: "BNB Chain", native: "BNB", rpc: CHAINS.bnb.rpc, explorer: CHAINS.bnb.explorer, explorerName: "BscScan", swap: "https://pancakeswap.finance/swap",
@@ -67,6 +67,7 @@ async function rpc(url: string, method: string, params: unknown[]) {
 function Inner() {
   const { ready, authenticated, login, exportWallet } = usePrivy();
   const { wallets, ready: wReady } = useWallets();
+  const { sendTransaction } = useSendTransaction();
   const w = wallets.find((x) => x.walletClientType === "privy");
   const [netKey, setNetKey] = useState("base");
   const BASE = (NETS.find((n) => n.key === netKey) ?? NETS[0]) as (typeof NETS)[number];
@@ -152,11 +153,10 @@ function Inner() {
     setSending(true);
     try {
       await w.switchChain(BASE.id);
-      const eth = await w.getEthereumProvider();
       const tx = t.address
-        ? { from: w.address, to: t.address, data: encodeFunctionData({ abi: erc20Abi, functionName: "transfer", args: [to, value] }) }
-        : { from: w.address, to, value: `0x${value.toString(16)}` };
-      const hash = (await eth.request({ method: "eth_sendTransaction", params: [tx] })) as string;
+        ? { to: t.address, data: encodeFunctionData({ abi: erc20Abi, functionName: "transfer", args: [to, value] }), chainId: BASE.id }
+        : { to, value, chainId: BASE.id };
+      const { hash } = await sendTransaction(tx, { address: w.address });
       toast.success("Sent!", { action: { label: "View", onClick: () => window.open(`${BASE.explorer}/tx/${hash}`, "_blank") } });
       setOpen(null); setTo(""); setAmount(""); setTimeout(() => void load(), 4000);
     } catch (e) { toast.error((e as Error).message.slice(0, 140)); } finally { setSending(false); }
@@ -197,18 +197,17 @@ function Inner() {
         execute={async (q, f, a) => {
           const raw = q.raw as { estimate: { approvalAddress?: string }; transactionRequest: { to: string; data: string; value?: string; gasLimit?: string } };
           await w.switchChain(BASE.id);
-          const eth = await w.getEthereumProvider();
           if (f.id !== NATIVE_EVM && raw.estimate.approvalAddress) {
             const spender = raw.estimate.approvalAddress as `0x${string}`;
             const allowance = await rpc(BASE.rpc, "eth_call", [{ to: f.id, data: encodeFunctionData({ abi: erc20Abi, functionName: "allowance", args: [w.address as `0x${string}`, spender] }) }, "latest"]);
             if (allowance < a) {
               toast.message("Approve the token first, then confirm the swap.");
-              await eth.request({ method: "eth_sendTransaction", params: [{ from: w.address, to: f.id, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [spender, a] }) }] });
+              await sendTransaction({ to: f.id, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [spender, a] }), chainId: BASE.id }, { address: w.address });
               await new Promise((r) => setTimeout(r, 4000));
             }
           }
           const tx = raw.transactionRequest;
-          await eth.request({ method: "eth_sendTransaction", params: [{ from: w.address, to: tx.to, data: tx.data, value: tx.value, gas: tx.gasLimit }] });
+          await sendTransaction({ to: tx.to, data: tx.data as `0x${string}`, value: tx.value ? BigInt(tx.value) : undefined, gasLimit: tx.gasLimit ? BigInt(tx.gasLimit) : undefined, chainId: BASE.id }, { address: w.address });
           setTimeout(() => void load(), 6000);
         }} />
 
