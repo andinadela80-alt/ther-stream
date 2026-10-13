@@ -207,7 +207,7 @@ function Inner() {
             }
           }
           const tx = raw.transactionRequest;
-          await sendTransaction({ to: tx.to, data: tx.data as `0x${string}`, value: tx.value ? BigInt(tx.value) : undefined, gasLimit: tx.gasLimit ? BigInt(tx.gasLimit) : undefined, chainId: BASE.id }, { address: w.address });
+          await sendTransaction({ to: tx.to, data: tx.data as `0x${string}`, ...(tx.value ? { value: BigInt(tx.value) } : {}), ...(tx.gasLimit ? { gasLimit: BigInt(tx.gasLimit) } : {}), chainId: BASE.id }, { address: w.address });
           setTimeout(() => void load(), 6000);
         }} />
 
