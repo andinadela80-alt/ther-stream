@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Open timeline posts in a dedicated detail view with visible replies and back navigation; verify the signed-in flow.
+
 - [x] Enable Lovable Cloud email and Google authentication
 - [x] Create private per-user profiles
 - [x] Connect sign-up, sign-in, session, and sign-out UI
