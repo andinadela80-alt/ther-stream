@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Add official @kageon profile, badges, and authenticated mention replies with AI.
+- [ ] Connect Arkham wallet intelligence (requires owner's API key).
+- [ ] Verify Kageon reply flow and access boundaries.
+
 - [x] Open timeline posts in a dedicated detail view with visible replies and back navigation; verify the signed-in flow.
 
 - [x] Enable Lovable Cloud email and Google authentication
