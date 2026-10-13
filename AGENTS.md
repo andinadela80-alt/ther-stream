@@ -19,3 +19,4 @@
 - Keep help, safety, community, and legal information on the dedicated `/support` route so it remains shareable and easy to find.
 - Privy login bridges to backend auth: server verifies Privy token, then issues a one-time magic-link token hash the browser exchanges for a session (keeps RLS working).
 - Sign-out clears the Privy session and the backend session, then returns the browser to the entry page, so the login screen never runs on a protected URL where the provider blocks the redirect.
+- Use the shared PostCard with an explicit detail mode for /post; timeline cards navigate there while embedded controls retain their actions, keeping post interactions consistent across feeds.

@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent, type PointerEvent } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Bookmark, ChevronDown, Share2, Flag, Heart, MessageCircle, MoreHorizontal, Pencil, Repeat2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,10 +16,10 @@ import { usePreferences } from "@/lib/preferences";
 import { postLink, shareLink } from "@/lib/share";
 import { REACTIONS, displayName, handle, short, timeAgo, type Post } from "@/lib/social";
 
-export function PostCard({ post: p, userId, onChange, onError }: { post: Post; userId: string; onChange: () => void; onError: (m: string) => void }) {
+export function PostCard({ post: p, userId, onChange, onError, detail = false }: { post: Post; userId: string; onChange: () => void; onError: (m: string) => void; detail?: boolean }) {
+  const navigate = useNavigate();
   const { following, pending, toggleFollow } = useFollows();
   const { t } = usePreferences();
-  const [showComments, setShowComments] = useState(false);
   const [showReact, setShowReact] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pressOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -99,8 +99,10 @@ export function PostCard({ post: p, userId, onChange, onError }: { post: Post; u
   async function addComment(e: FormEvent) {
     e.preventDefault();
     if (!comment.trim()) return;
-    await run(supabase.from("post_comments").insert({ post_id: p.id, author_id: userId, content: comment.trim() }));
+    const { error } = await supabase.from("post_comments").insert({ post_id: p.id, author_id: userId, content: comment.trim() });
+    if (error) return onError(error.message);
     setComment("");
+    onChange();
   }
   async function saveEdit(e: FormEvent) {
     e.preventDefault();
@@ -127,7 +129,16 @@ export function PostCard({ post: p, userId, onChange, onError }: { post: Post; u
   }
 
   return (
-    <article className="glass-panel rounded-[24px] border border-surface/80 p-4 sm:p-5">
+    <article
+      className={`glass-panel rounded-[24px] border border-surface/80 p-4 sm:p-5 ${detail ? "" : "cursor-pointer"}`}
+      onClick={detail ? undefined : (event) => {
+        const target = event.target;
+        if (!(target instanceof Element) || target.closest("a, button, input, textarea, select, label, form, [role=menuitem], [role=dialog]")) return;
+        if (window.getSelection()?.toString()) return;
+        void navigate({ to: "/post", search: { id: p.id } });
+      }}
+    >
+      {!detail && <Link to="/post" search={{ id: p.id }} className="sr-only focus:not-sr-only focus:mb-3 focus:block focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">View post by {displayName(p.author)}</Link>}
       <header className="flex items-start gap-3">
         <Link to="/profile" search={{ id: p.author_id }}><Avatar profile={p.author} /></Link>
         <div className="min-w-0 flex-1">
@@ -158,7 +169,7 @@ export function PostCard({ post: p, userId, onChange, onError }: { post: Post; u
       </header>
 
       <div className="relative mt-2 flex justify-between pl-[44px] text-muted-foreground">
-        <Button variant="ghost" size="sm" onClick={() => setShowComments((v) => !v)} aria-label={t("comments")}><MessageCircle className="size-4" />{p.post_comments.length}</Button>
+        <Button variant="ghost" size="sm" onClick={() => { if (detail) document.getElementById(`reply-${p.id}`)?.focus(); else void navigate({ to: "/post", search: { id: p.id } }); }} aria-label={t("comments")}><MessageCircle className="size-4" />{p.post_comments.length}</Button>
         <Button variant="ghost" size="sm" onClick={toggleRepost} aria-pressed={reposted} aria-label={t("repost")} className={reposted ? "text-primary" : ""}><Repeat2 className="size-4" />{p.post_reposts.length}</Button>
         <Popover open={showReact} onOpenChange={setShowReact}>
           <div className="flex items-center">
@@ -179,8 +190,9 @@ export function PostCard({ post: p, userId, onChange, onError }: { post: Post; u
         <Button variant="ghost" size="icon" className={bookmarked ? "text-primary" : ""} onClick={toggleBookmark} aria-pressed={bookmarked} aria-label={bookmarked ? t("removeBookmark") : t("bookmark")}><Bookmark className={`size-4 ${bookmarked ? "fill-primary" : ""}`} /></Button>
       </div>
 
-      {showComments && (
+      {detail && (
         <div className="mt-2 space-y-2.5 border-t border-border/60 pt-3">
+          {detail && <h2 className="font-display text-sm font-semibold">Replies · {p.post_comments.length}</h2>}
           {p.post_comments.map((c) => (
             <div key={c.id} className="flex items-start gap-2 text-sm">
               <Avatar profile={c.author} size={28} />
@@ -189,7 +201,7 @@ export function PostCard({ post: p, userId, onChange, onError }: { post: Post; u
             </div>
           ))}
           <form onSubmit={addComment} className="flex gap-2">
-            <input value={comment} onChange={(e) => setComment(e.target.value)} maxLength={300} placeholder={t("writeComment")} className="h-9 flex-1 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
+            <input id={`reply-${p.id}`} aria-label="Post your reply" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={300} placeholder={detail ? "Post your reply" : t("writeComment")} className="h-9 min-w-0 flex-1 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
             <Button type="submit" size="sm" disabled={!comment.trim()}>{t("reply")}</Button>
           </form>
         </div>
