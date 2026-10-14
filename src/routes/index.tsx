@@ -5,6 +5,8 @@ import { ADS, AD_EVERY } from "@/lib/ads";
 import { BadgeCheck, Bell, Bookmark, Check, CircleHelp, Languages, Loader2, Menu, ImagePlus, Send, Users, UserRoundPlus, Wand2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { generatePostDraft } from "@/lib/ai-draft.functions";
+import { replyAsKageon } from "@/lib/kageon.functions";
+import { mentionsKageon } from "@/lib/kageon/rules";
 import type { User } from "@supabase/supabase-js";
 
 import { AppShell } from "@/components/AppShell";
@@ -71,6 +73,8 @@ function HomeFeed({ user, view, onHome }: { user: User; view: HomeView; onHome: 
   const [idea, setIdea] = useState("");
   const [drafting, setDrafting] = useState(false);
   const runDraft = useServerFn(generatePostDraft);
+  const requestKageon = useServerFn(replyAsKageon);
+  const [kageonBusy, setKageonBusy] = useState(false);
   async function draftWithAi() {
     setDrafting(true); setError(null);
     try { const r = await runDraft({ data: { idea } }); setDraft(r.draft); setIdea(""); }
@@ -99,9 +103,19 @@ function HomeFeed({ user, view, onHome }: { user: User; view: HomeView; onHome: 
     setBusy(true); setError(null);
     try {
       const image_url = image ? await uploadImage(image, "post") : null;
-      const { error } = await supabase.from("posts").insert({ author_id: user.id, content: draft.trim(), image_url });
+      const content = draft.trim();
+      const { data: created, error } = await supabase.from("posts").insert({ author_id: user.id, content, image_url }).select("id").single();
       if (error) throw error;
       setDraft(""); setImage(null); void load();
+      if (created && mentionsKageon(content)) {
+        setKageonBusy(true);
+        try {
+          const result = await requestKageon({ data: { id: created.id, kind: "post" } });
+          if (result.error) setError(result.error);
+          await load();
+        } catch (failure) { setError(failure instanceof Error ? failure.message : "Kageon could not answer."); }
+        finally { setKageonBusy(false); }
+      }
     } catch (err) { setError((err as Error).message); } finally { setBusy(false); }
   }
 
@@ -134,9 +148,10 @@ function HomeFeed({ user, view, onHome }: { user: User; view: HomeView; onHome: 
             <label className="cursor-pointer text-primary" aria-label="Add image"><ImagePlus className="size-5" /><input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f && f.size > 10 * 1024 * 1024) return setError("Maximum size is 10 MB."); setImage(f ?? null); }} /></label>
             {draft.length}/500
           </span>
-           <Button type="submit" size="sm" disabled={busy || (!draft.trim() && !image)}><Send className="size-4" />{t("post")}</Button>
+           <Button type="submit" size="sm" disabled={busy || kageonBusy || (!draft.trim() && !image)}><Send className="size-4" />{t("post")}</Button>
         </div>
       </form>
+      {kageonBusy && <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />Kageon is preparing a reply…</p>}
       {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
        {posts.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">{t("noPosts")}</p>}
       {posts.map((p, i) => (

@@ -5,7 +5,7 @@ import ogBadge from "@/assets/og-badge.jpg.asset.json";
 import { BrandLogo } from "@/components/BrandLogo";
 import { supabase } from "@/integrations/supabase/client";
 
-const CURATED = new Set(["ybs", "thorvox", "mindcaster"]);
+const CURATED = new Set(["ybs", "thorvox", "mindcaster", "kageon"]);
 
 type BadgeMap = Map<string, { og: boolean; verified: boolean }>;
 let paid: BadgeMap = new Map();
