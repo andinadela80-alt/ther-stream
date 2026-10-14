@@ -53,6 +53,79 @@ export type Database = {
           },
         ]
       }
+      kageon_requests: {
+        Row: {
+          created_at: string
+          error: string | null
+          post_id: string
+          reply_id: string | null
+          source_id: string
+          source_kind: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          post_id: string
+          reply_id?: string | null
+          source_id: string
+          source_kind: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          post_id?: string
+          reply_id?: string | null
+          source_id?: string
+          source_kind?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kageon_requests_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kageon_requests_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kageon_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kageon_service_state: {
+        Row: {
+          id: string
+          pause_reason: string | null
+          paused_at: string | null
+        }
+        Insert: {
+          id: string
+          pause_reason?: string | null
+          paused_at?: string | null
+        }
+        Update: {
+          id?: string
+          pause_reason?: string | null
+          paused_at?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string
@@ -634,6 +707,10 @@ export type Database = {
     }
     Functions: {
       claim_og_badge: { Args: never; Returns: string }
+      complete_kageon_request: {
+        Args: { p_bot: string; p_content: string; p_source: string }
+        Returns: string
+      }
       get_my_wallet: {
         Args: never
         Returns: {
