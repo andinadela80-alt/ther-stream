@@ -2,6 +2,9 @@ import { useRef, useState, type FormEvent, type PointerEvent } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Bookmark, ChevronDown, Share2, Flag, Heart, MessageCircle, MoreHorizontal, Pencil, Repeat2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { replyAsKageon } from "@/lib/kageon.functions";
+import { mentionsKageon } from "@/lib/kageon/rules";
 
 import { Avatar } from "@/components/Avatar";
 import { RichText } from "@/components/RichText";
@@ -26,6 +29,8 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
   const longPressed = useRef(false);
   const reactionPending = useRef(false);
   const [comment, setComment] = useState("");
+  const [replyBusy, setReplyBusy] = useState(false);
+  const requestKageon = useServerFn(replyAsKageon);
   const [editing, setEditing] = useState(false);
   const [editContent, setEditContent] = useState(p.content);
   const [reporting, setReporting] = useState(false);
@@ -98,11 +103,20 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
   }
   async function addComment(e: FormEvent) {
     e.preventDefault();
-    if (!comment.trim()) return;
-    const { error } = await supabase.from("post_comments").insert({ post_id: p.id, author_id: userId, content: comment.trim() });
-    if (error) return onError(error.message);
-    setComment("");
-    onChange();
+    if (!comment.trim() || replyBusy) return;
+    setReplyBusy(true);
+    const content = comment.trim();
+    try {
+      const { data, error } = await supabase.from("post_comments").insert({ post_id: p.id, author_id: userId, content }).select("id").single();
+      if (error) throw error;
+      setComment(""); onChange();
+      if (data && mentionsKageon(content)) {
+        const result = await requestKageon({ data: { id: data.id, kind: "comment" } });
+        if (result.error) onError(result.error);
+        onChange();
+      }
+    } catch (failure) { onError(failure instanceof Error ? failure.message : "Reply could not be sent."); }
+    finally { setReplyBusy(false); }
   }
   async function saveEdit(e: FormEvent) {
     e.preventDefault();
@@ -202,7 +216,7 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
           ))}
           <form onSubmit={addComment} className="flex gap-2">
             <input id={`reply-${p.id}`} aria-label="Post your reply" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={300} placeholder={detail ? "Post your reply" : t("writeComment")} className="h-9 min-w-0 flex-1 rounded-xl border border-border/60 bg-surface/75 px-3 text-sm outline-none focus:border-primary" />
-            <Button type="submit" size="sm" disabled={!comment.trim()}>{t("reply")}</Button>
+            <Button type="submit" size="sm" disabled={replyBusy || !comment.trim()}>{replyBusy ? "Sending…" : t("reply")}</Button>
           </form>
         </div>
       )}
