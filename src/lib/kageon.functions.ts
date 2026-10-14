@@ -15,6 +15,7 @@ export const replyAsKageon = createServerFn({ method: "POST" })
     if (source.error || !source.data || source.data.author_id !== context.userId) throw new Error("You can only request a reply to your own mention.");
     if (!mentionsKageon(source.data.content)) return { status: "skipped" as const };
     const postId = "post_id" in source.data ? source.data.post_id : source.data.id;
+    if (typeof postId !== "string") throw new Error("This conversation is not available.");
     const thread = await context.supabase.from("posts").select("content").eq("id", postId).single();
     if (thread.error) throw new Error("This conversation is not available.");
     const comments = await context.supabase.from("post_comments").select("author_id,content").eq("post_id", postId).order("created_at", { ascending: false }).limit(12);
