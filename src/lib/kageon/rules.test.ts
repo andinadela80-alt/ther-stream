@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { fitReply, mentionedAddresses, mentionsKageon } from "./rules";
 describe("Kageon mention rules", () => {
   test("replies to exact case-insensitive username mentions", () => {
