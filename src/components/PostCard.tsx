@@ -144,7 +144,7 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
 
   return (
     <article
-      className={`glass-panel rounded-[24px] border border-surface/80 p-4 sm:p-5 ${detail ? "" : "cursor-pointer"}`}
+      className={`${detail ? "glass-panel" : "feed-card cursor-pointer"} rounded-[24px] border border-surface/80 p-4 sm:p-5`}
       onClick={detail ? undefined : (event) => {
         const target = event.target;
         if (!(target instanceof Element) || target.closest("a, button, input, textarea, select, label, form, [role=menuitem], [role=dialog]")) return;
@@ -167,7 +167,7 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
           {handle(p.author) && <Link to="/profile" search={{ id: p.author_id }} className="block text-xs text-muted-foreground">{handle(p.author)}</Link>}
           {p.author?.wallet_address && <span className="text-[11px] text-primary">{short(p.author.wallet_address)}</span>}
           <p className="mt-1.5 whitespace-pre-wrap break-words text-sm"><RichText text={p.content} /></p>
-          {p.image_url && <img src={p.image_url} alt="" loading="lazy" className="mt-2 max-h-[480px] w-full rounded-2xl border border-border/60 object-cover" />}
+          {p.image_url && <img src={p.image_url} alt="" loading="lazy" decoding="async" className="mt-2 max-h-[480px] w-full rounded-2xl border border-border/60 object-cover" />}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="size-8 shrink-0" aria-label={t("postMenu")}><MoreHorizontal className="size-5" /></Button></DropdownMenuTrigger>

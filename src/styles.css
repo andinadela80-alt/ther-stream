@@ -170,7 +170,16 @@
 @utility glass-panel {
   background: color-mix(in oklab, var(--surface) 58%, transparent);
   box-shadow: 0 24px 60px -30px color-mix(in oklab, var(--foreground) 35%, transparent);
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(14px);
+}
+
+/* Feed cards: no live blur (costly while scrolling); skip offscreen layout/paint. */
+@utility feed-card {
+  background: color-mix(in oklab, var(--surface) 88%, transparent);
+  box-shadow: 0 16px 40px -28px color-mix(in oklab, var(--foreground) 35%, transparent);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 260px;
+  contain: layout paint style;
 }
 
 @media (prefers-reduced-motion: reduce) {
