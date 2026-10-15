@@ -5,7 +5,7 @@ export class LlmError extends Error {
 
 async function gemini(key: string, system: string, user: string) {
   const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent", {
-    method: "POST", signal: AbortSignal.timeout(25000),
+    method: "POST", signal: AbortSignal.timeout(15000),
     headers: { "Content-Type": "application/json", "x-goog-api-key": key },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: system }] },
@@ -20,7 +20,7 @@ async function gemini(key: string, system: string, user: string) {
 
 async function groq(key: string, system: string, user: string) {
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST", signal: AbortSignal.timeout(25000),
+    method: "POST", signal: AbortSignal.timeout(15000),
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({
       model: "openai/gpt-oss-120b",
