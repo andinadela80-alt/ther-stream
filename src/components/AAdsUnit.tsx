@@ -10,7 +10,7 @@ export function AAdsUnit({ className = "" }: { className?: string }) {
   useEffect(() => setMounted(true), []);
 
   return (
-    <div className={`w-full overflow-hidden rounded-xl ${className}`}>
+    <div className={`w-full overflow-hidden rounded-xl ${className}`} style={{ contain: "strict", height: 120 }}>
       {!mounted || failed ? (
         <div className="grid h-[120px] place-items-center rounded-xl bg-surface/60 text-xs text-muted-foreground">Sponsored</div>
       ) : (

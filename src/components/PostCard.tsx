@@ -144,7 +144,7 @@ export function PostCard({ post: p, userId, onChange, onError, detail = false }:
 
   return (
     <article
-      className={`glass-panel rounded-[24px] border border-surface/80 p-4 sm:p-5 ${detail ? "" : "cursor-pointer"}`}
+      className={`${detail ? "glass-panel" : "feed-card cursor-pointer"} rounded-[24px] border border-surface/80 p-4 sm:p-5`}
       onClick={detail ? undefined : (event) => {
         const target = event.target;
         if (!(target instanceof Element) || target.closest("a, button, input, textarea, select, label, form, [role=menuitem], [role=dialog]")) return;

@@ -8,7 +8,7 @@ import type { Ad } from "@/lib/ads";
 export function SponsoredPost({ ad }: { ad: Ad }) {
   const cls = "mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground";
   return (
-    <article className="glass-panel rounded-[24px] border border-surface/80 p-4">
+    <article className="feed-card rounded-[24px] border border-surface/80 p-4">
       <div className="flex items-center gap-3">
         <BrandLogo size={40} className="rounded-full" />
         <div className="min-w-0 flex-1">

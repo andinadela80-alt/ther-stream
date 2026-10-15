@@ -57,7 +57,7 @@ export function AppShell({ title, actions, children }: { title: string; actions?
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
-      <img src={signalBackground} alt="" width={1440} height={900} className="pointer-events-none fixed inset-0 h-full w-full object-cover" />
+      <img src={signalBackground} alt="" width={1440} height={900} decoding="async" className="pointer-events-none fixed inset-0 h-full w-full transform-gpu object-cover will-change-transform" />
       {!ready ? null : !user ? (
         <main className="relative z-10 flex min-h-screen flex-col items-center justify-center px-5 py-10">
           <header className="text-center">
