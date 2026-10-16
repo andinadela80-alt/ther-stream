@@ -1,8 +1,8 @@
 # Roadmap
 
-- [ ] Add official @kageon profile, badges, and authenticated mention replies with AI.
-- [ ] Connect Arkham wallet intelligence (requires owner's API key).
-- [ ] Verify Kageon reply flow and access boundaries.
+- [x] Add official @kageon profile, badges, and authenticated mention replies with AI.
+- [x] Connect Arkham wallet intelligence (owner's API key stored; verified with a live address mention).
+- [x] Verify Kageon reply flow and access boundaries (signed-in mention → Kageon reply with badges visible in post detail).
 
 - [x] Open timeline posts in a dedicated detail view with visible replies and back navigation; verify the signed-in flow.
 
