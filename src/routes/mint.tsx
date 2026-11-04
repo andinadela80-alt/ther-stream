@@ -55,6 +55,7 @@ function MintPage() {
     setBusy(true);
     try {
       const [acc] = (await p.request({ method: "eth_requestAccounts" })) as string[];
+      if (!acc) throw new Error("No account selected.");
       try { await p.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x38" }] }); } catch { /* user can switch manually */ }
       setAddress(acc);
       const data = "0x70a08231" + acc.slice(2).toLowerCase().padStart(64, "0");
