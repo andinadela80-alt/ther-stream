@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Connect the deployed Genesis Pass contract to public minting, live supply/price, eligibility checks, and confirmed transaction status.
+
 - [x] Add official @kageon profile, badges, and authenticated mention replies with AI.
 - [x] Connect Arkham wallet intelligence (owner's API key stored; verified with a live address mention).
 - [x] Verify Kageon reply flow and access boundaries (signed-in mention → Kageon reply with badges visible in post detail).
