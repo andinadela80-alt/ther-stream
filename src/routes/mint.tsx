@@ -17,6 +17,7 @@ const TIERS = [
 ];
 
 export const Route = createFileRoute("/mint")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Mint Mindcaster Genesis Pass — BNB Chain" },

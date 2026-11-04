@@ -4,6 +4,7 @@ import { genesisMetadata } from "@/lib/nft/genesis-metadata";
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS" };
 
 export const Route = createFileRoute("/api/public/nft/genesis/$id")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
