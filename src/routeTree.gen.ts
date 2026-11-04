@@ -14,6 +14,7 @@ import { Route as CashtagRouteImport } from './routes/cashtag'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as FomoRouteImport } from './routes/fomo'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as MintRouteImport } from './routes/mint'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as PostRouteImport } from './routes/post'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -22,6 +23,7 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as MediaSplatRouteImport } from './routes/media.$'
+import { Route as ApiPublicNftGenesisIdRouteImport } from './routes/api/public/nft/genesis/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +48,11 @@ const FomoRoute = FomoRouteImport.update({
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MintRoute = MintRouteImport.update({
+  id: '/mint',
+  path: '/mint',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -88,6 +95,11 @@ const MediaSplatRoute = MediaSplatRouteImport.update({
   path: '/media/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNftGenesisIdRoute = ApiPublicNftGenesisIdRouteImport.update({
+  id: '/api/public/nft/genesis/$id',
+  path: '/api/public/nft/genesis/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/discover': typeof DiscoverRoute
   '/fomo': typeof FomoRoute
   '/messages': typeof MessagesRoute
+  '/mint': typeof MintRoute
   '/notifications': typeof NotificationsRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
@@ -103,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
   '/media/$': typeof MediaSplatRoute
+  '/api/public/nft/genesis/$id': typeof ApiPublicNftGenesisIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +124,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverRoute
   '/fomo': typeof FomoRoute
   '/messages': typeof MessagesRoute
+  '/mint': typeof MintRoute
   '/notifications': typeof NotificationsRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
@@ -118,6 +133,7 @@ export interface FileRoutesByTo {
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
   '/media/$': typeof MediaSplatRoute
+  '/api/public/nft/genesis/$id': typeof ApiPublicNftGenesisIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -126,6 +142,7 @@ export interface FileRoutesById {
   '/discover': typeof DiscoverRoute
   '/fomo': typeof FomoRoute
   '/messages': typeof MessagesRoute
+  '/mint': typeof MintRoute
   '/notifications': typeof NotificationsRoute
   '/post': typeof PostRoute
   '/profile': typeof ProfileRoute
@@ -134,6 +151,7 @@ export interface FileRoutesById {
   '/verify': typeof VerifyRoute
   '/wallet': typeof WalletRoute
   '/media/$': typeof MediaSplatRoute
+  '/api/public/nft/genesis/$id': typeof ApiPublicNftGenesisIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -143,6 +161,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/fomo'
     | '/messages'
+    | '/mint'
     | '/notifications'
     | '/post'
     | '/profile'
@@ -151,6 +170,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/wallet'
     | '/media/$'
+    | '/api/public/nft/genesis/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -158,6 +178,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/fomo'
     | '/messages'
+    | '/mint'
     | '/notifications'
     | '/post'
     | '/profile'
@@ -166,6 +187,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/wallet'
     | '/media/$'
+    | '/api/public/nft/genesis/$id'
   id:
     | '__root__'
     | '/'
@@ -173,6 +195,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/fomo'
     | '/messages'
+    | '/mint'
     | '/notifications'
     | '/post'
     | '/profile'
@@ -181,6 +204,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/wallet'
     | '/media/$'
+    | '/api/public/nft/genesis/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -189,6 +213,7 @@ export interface RootRouteChildren {
   DiscoverRoute: typeof DiscoverRoute
   FomoRoute: typeof FomoRoute
   MessagesRoute: typeof MessagesRoute
+  MintRoute: typeof MintRoute
   NotificationsRoute: typeof NotificationsRoute
   PostRoute: typeof PostRoute
   ProfileRoute: typeof ProfileRoute
@@ -197,6 +222,7 @@ export interface RootRouteChildren {
   VerifyRoute: typeof VerifyRoute
   WalletRoute: typeof WalletRoute
   MediaSplatRoute: typeof MediaSplatRoute
+  ApiPublicNftGenesisIdRoute: typeof ApiPublicNftGenesisIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -234,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mint': {
+      id: '/mint'
+      path: '/mint'
+      fullPath: '/mint'
+      preLoaderRoute: typeof MintRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -292,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MediaSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/nft/genesis/$id': {
+      id: '/api/public/nft/genesis/$id'
+      path: '/api/public/nft/genesis/$id'
+      fullPath: '/api/public/nft/genesis/$id'
+      preLoaderRoute: typeof ApiPublicNftGenesisIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -301,6 +341,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverRoute: DiscoverRoute,
   FomoRoute: FomoRoute,
   MessagesRoute: MessagesRoute,
+  MintRoute: MintRoute,
   NotificationsRoute: NotificationsRoute,
   PostRoute: PostRoute,
   ProfileRoute: ProfileRoute,
@@ -309,6 +350,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyRoute: VerifyRoute,
   WalletRoute: WalletRoute,
   MediaSplatRoute: MediaSplatRoute,
+  ApiPublicNftGenesisIdRoute: ApiPublicNftGenesisIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
