@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 // Agent ID registry (SPACE ID) on BNB Chain.
 const AGENT_REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F" as const;
 // Set once the Genesis Pass contract is deployed on BNB Chain.
-const MINT_CONTRACT: `0x${string}` | null = null;
+const MINT_CONTRACT: `0x${string}` = "0xe73f162e0728e62ee1ebc50da1e79333acd1e8bc";
+
 const BSC_RPC = "https://bsc-dataseed1.binance.org";
 
 const TIERS = [
