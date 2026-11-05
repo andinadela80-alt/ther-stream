@@ -1,21 +1,43 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Loader2, ShieldCheck, ShieldX, Wallet } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ExternalLink, ImageOff, Loader2, RefreshCw, ShieldCheck, ShieldX, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GENESIS_VARIANTS, GENESIS_SUPPLY } from "@/lib/nft/genesis-metadata";
+import { GENESIS_CONTRACT, AGENT_REGISTRY } from "@/lib/nft/mint-rules";
+import { createPublicClient, http, parseAbi } from "viem";
+import { bsc } from "viem/chains";
+import commonArtwork from "@/assets/genesis-common.png.asset.json";
+import uncommonArtwork from "@/assets/genesis-uncommon.png.asset.json";
+import epicArtwork from "@/assets/genesis-epic.png.asset.json";
+import legendaryArtwork from "@/assets/genesis-legendary.png.asset.json";
 
 // Agent ID registry (SPACE ID) on BNB Chain.
-const AGENT_REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F" as const;
-// Set once the Genesis Pass contract is deployed on BNB Chain.
-const MINT_CONTRACT: `0x${string}` = "0xe73f162e0728e62ee1ebc50da1e79333acd1e8bc";
+const MINT_CONTRACT = GENESIS_CONTRACT;
 
 const BSC_RPC = "https://bsc-dataseed1.binance.org";
+const mintClient = createPublicClient({ chain: bsc, transport: http(BSC_RPC, { timeout: 12000 }) });
+const counterAbi = parseAbi(["function totalMinted() view returns (uint256)"]);
+const CONTRACT_URL = `https://bscscan.com/address/${MINT_CONTRACT}`;
 
 const TIERS = [
-  { name: "Common", share: "50%", count: 500, color: "Green", cls: "from-emerald-500/30 to-emerald-900/10 border-emerald-400/40" },
-  { name: "Uncommon", share: "30%", count: 300, color: "Blue", cls: "from-sky-500/30 to-sky-900/10 border-sky-400/40" },
-  { name: "Epic", share: "15%", count: 150, color: "Purple", cls: "from-fuchsia-500/30 to-fuchsia-900/10 border-fuchsia-400/40" },
-  { name: "Legendary", share: "5%", count: 50, color: "Gold", cls: "from-amber-400/30 to-amber-900/10 border-amber-300/40" },
+  { name: "Common", share: "50%", count: 500, color: "Green", cls: "border-rarity-common", variant: 0 },
+  { name: "Uncommon", share: "30%", count: 300, color: "Blue", cls: "border-rarity-uncommon", variant: 2 },
+  { name: "Epic", share: "15%", count: 150, color: "Purple", cls: "border-rarity-epic", variant: 1 },
+  { name: "Legendary", share: "5%", count: 50, color: "Gold", cls: "border-rarity-legendary", variant: 3 },
 ];
+
+const ORIGINAL_ARTWORK = [commonArtwork.url, epicArtwork.url, uncommonArtwork.url, legendaryArtwork.url];
+const IMAGE_GATEWAYS = ["https://gateway.pinata.cloud/ipfs/", "https://ipfs.io/ipfs/"];
+function NftPreview({ variant, name }: { variant: number; name: string }) {
+  const [gateway, setGateway] = useState(0);
+  const cid = GENESIS_VARIANTS[variant]?.image.replace("ipfs://", "");
+  const sources = [ORIGINAL_ARTWORK[variant], ...IMAGE_GATEWAYS.map((base) => `${base}${cid}`)];
+  return <div className="aspect-square w-full overflow-hidden bg-muted">
+    {cid && gateway < sources.length ? (
+      <img src={sources[gateway]} alt={`Mindcaster Genesis Pass — ${name}`} className="h-full w-full object-contain" decoding="async" onError={() => setGateway((current) => current + 1)} />
+    ) : <div className="flex h-full flex-col items-center justify-center gap-2 p-3 text-center text-xs text-muted-foreground"><ImageOff className="size-6" /><span>Artwork temporarily unavailable</span><Button variant="ghost" size="sm" onClick={() => setGateway(0)}><RefreshCw className="size-3" /> Retry</Button></div>}
+  </div>;
+}
 
 export const Route = createFileRoute("/mint")({
   staticData: { sitemap: true },
@@ -48,6 +70,25 @@ function MintPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tx, setTx] = useState<string | null>(null);
+  const [minted, setMinted] = useState<number | null>(null);
+  const [counterLoading, setCounterLoading] = useState(true);
+  const [counterError, setCounterError] = useState(false);
+
+  async function refreshCounter() {
+    setCounterLoading(true);
+    try {
+      const value = await mintClient.readContract({ address: MINT_CONTRACT, abi: counterAbi, functionName: "totalMinted" });
+      setMinted(Number(value));
+      setCounterError(false);
+    } catch { setCounterError(true); }
+    finally { setCounterLoading(false); }
+  }
+
+  useEffect(() => {
+    void refreshCounter();
+    const timer = window.setInterval(() => { void refreshCounter(); }, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   async function connect() {
     setError(null);
@@ -84,17 +125,27 @@ function MintPage() {
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-2xl px-4 py-10 space-y-8">
         <header className="space-y-3 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">BNB Chain · Genesis Event</p>
-          <h1 className="text-4xl font-bold">Mindcaster Genesis Pass</h1>
+          <p className="text-xs uppercase text-muted-foreground">BNB Chain · Genesis Event</p>
+          <h1 className="text-3xl font-bold sm:text-4xl">Mindcaster Genesis Pass</h1>
           <p className="text-muted-foreground">1,000 founding member NFTs. Exclusive to Binance Agent ID (.ai) holders. No Mindcaster account required.</p>
         </header>
 
-        <section className="grid grid-cols-2 gap-3">
+        <section className="space-y-3 border-y border-border py-5" aria-label="Mint progress">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-lg font-semibold tabular-nums" aria-live="polite">{minted === null ? "—" : minted.toLocaleString("en-US")} / {GENESIS_SUPPLY.toLocaleString("en-US")} <span className="text-sm font-normal text-muted-foreground">Minted</span></p>
+            <Button variant="ghost" size="icon" aria-label="Refresh mint count" title="Refresh mint count" disabled={counterLoading} onClick={() => void refreshCounter()}><RefreshCw className={`size-4 ${counterLoading ? "animate-spin" : ""}`} /></Button>
+          </div>
+          <progress className="mint-progress h-2 w-full overflow-hidden rounded-full" max={GENESIS_SUPPLY} value={minted ?? 0} aria-label="Genesis Pass minted" />
+          {counterError && <p className="text-xs text-muted-foreground">{minted === null ? "Live count is unavailable. Please retry." : "Could not refresh. Showing the last available count."}</p>}
+          <a href={CONTRACT_URL} target="_blank" rel="noreferrer" className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-link"><span className="inline-flex items-center gap-1">Contract on BscScan <ExternalLink className="size-3" /></span><span className="break-all font-mono">{MINT_CONTRACT}</span></a>
+        </section>
+
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Genesis Pass rarities">
           {TIERS.map((t) => (
-            <div key={t.name} className={`rounded-xl border bg-gradient-to-br p-4 ${t.cls}`}>
-              <p className="text-lg font-semibold">{t.name}</p>
-              <p className="text-sm text-muted-foreground">{t.count} · {t.share} · {t.color}</p>
-            </div>
+            <article key={t.name} className={`overflow-hidden rounded-lg border bg-card ${t.cls}`}>
+              <NftPreview variant={t.variant} name={t.name} />
+              <div className="space-y-1 p-3"><h2 className="text-sm font-semibold">{t.name}</h2><p className="text-xs text-muted-foreground">{t.count} · {t.share} · {t.color}</p></div>
+            </article>
           ))}
         </section>
 

@@ -22,3 +22,4 @@
 - Use the shared PostCard with an explicit detail mode for /post; timeline cards navigate there while embedded controls retain their actions, keeping post interactions consistent across feeds.
 - Kageon replies run only from authenticated post/reply submit events, never page loads; verify source ownership and thread RLS before service-role writes, deduplicate per mention in the database, atomically save bot replies, and persist terminal AI service pauses to prevent duplicate billing or bypassing denials.
 - Kageon uses request-local Responses helpers and server-only Arkham snapshots of explicitly supplied addresses; its auth identity is banned from sign-in and username edits are server-only to prevent bot impersonation.
+- The public mint page reads its minted counter from the deployed contract in the browser and displays original artwork CIDs from Genesis metadata; never substitute invented NFT artwork.
