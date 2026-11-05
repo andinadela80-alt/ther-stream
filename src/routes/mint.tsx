@@ -6,6 +6,10 @@ import { GENESIS_VARIANTS, GENESIS_SUPPLY } from "@/lib/nft/genesis-metadata";
 import { GENESIS_CONTRACT, AGENT_REGISTRY } from "@/lib/nft/mint-rules";
 import { createPublicClient, http, parseAbi } from "viem";
 import { bsc } from "viem/chains";
+import commonArtwork from "@/assets/genesis-common.png.asset.json";
+import uncommonArtwork from "@/assets/genesis-uncommon.png.asset.json";
+import epicArtwork from "@/assets/genesis-epic.png.asset.json";
+import legendaryArtwork from "@/assets/genesis-legendary.png.asset.json";
 
 // Agent ID registry (SPACE ID) on BNB Chain.
 const MINT_CONTRACT = GENESIS_CONTRACT;
@@ -22,13 +26,15 @@ const TIERS = [
   { name: "Legendary", share: "5%", count: 50, color: "Gold", cls: "border-rarity-legendary", variant: 3 },
 ];
 
-const IMAGE_GATEWAYS = ["https://dweb.link/ipfs/", "https://ipfs.io/ipfs/"];
+const ORIGINAL_ARTWORK = [commonArtwork.url, epicArtwork.url, uncommonArtwork.url, legendaryArtwork.url];
+const IMAGE_GATEWAYS = ["https://gateway.pinata.cloud/ipfs/", "https://ipfs.io/ipfs/"];
 function NftPreview({ variant, name }: { variant: number; name: string }) {
   const [gateway, setGateway] = useState(0);
   const cid = GENESIS_VARIANTS[variant]?.image.replace("ipfs://", "");
+  const sources = [ORIGINAL_ARTWORK[variant], ...IMAGE_GATEWAYS.map((base) => `${base}${cid}`)];
   return <div className="aspect-square w-full overflow-hidden bg-muted">
-    {cid && gateway < IMAGE_GATEWAYS.length ? (
-      <img src={`${IMAGE_GATEWAYS[gateway]}${cid}`} alt={`Mindcaster Genesis Pass — ${name}`} className="h-full w-full object-contain" decoding="async" onError={() => setGateway((current) => current + 1)} />
+    {cid && gateway < sources.length ? (
+      <img src={sources[gateway]} alt={`Mindcaster Genesis Pass — ${name}`} className="h-full w-full object-contain" decoding="async" onError={() => setGateway((current) => current + 1)} />
     ) : <div className="flex h-full flex-col items-center justify-center gap-2 p-3 text-center text-xs text-muted-foreground"><ImageOff className="size-6" /><span>Artwork temporarily unavailable</span><Button variant="ghost" size="sm" onClick={() => setGateway(0)}><RefreshCw className="size-3" /> Retry</Button></div>}
   </div>;
 }
