@@ -63,11 +63,19 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-surface: var(--surface);
   --color-link: var(--link);
+  --color-rarity-common: var(--rarity-common);
+  --color-rarity-uncommon: var(--rarity-uncommon);
+  --color-rarity-epic: var(--rarity-epic);
+  --color-rarity-legendary: var(--rarity-legendary);
   --shadow-signal: 0 0 30px -4px color-mix(in oklab, var(--primary) 75%, transparent);
   --shadow-tab: 0 1px 4px color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
 :root {
+  --rarity-common: oklch(0.65 0.16 155);
+  --rarity-uncommon: oklch(0.65 0.15 240);
+  --rarity-epic: oklch(0.65 0.2 310);
+  --rarity-legendary: oklch(0.78 0.15 85);
   --radius: 0.75rem;
   --background: oklch(0.979 0.006 228.9);
   --foreground: oklch(0.174 0.033 254.8);
@@ -106,6 +114,10 @@
 }
 
 .dark {
+  --rarity-common: oklch(0.75 0.16 155);
+  --rarity-uncommon: oklch(0.75 0.15 240);
+  --rarity-epic: oklch(0.75 0.2 310);
+  --rarity-legendary: oklch(0.85 0.15 85);
   --background: oklch(0.17 0.03 255);
   --foreground: oklch(0.975 0.006 228.9);
   --card: oklch(0.23 0.035 255 / 70%);
@@ -154,6 +166,11 @@
     letter-spacing: 0;
   }
 }
+
+.mint-progress { background: var(--muted); accent-color: var(--primary); }
+.mint-progress::-webkit-progress-bar { background: var(--muted); }
+.mint-progress::-webkit-progress-value { background: var(--primary); border-radius: inherit; }
+.mint-progress::-moz-progress-bar { background: var(--primary); border-radius: inherit; }
 
 @keyframes signal-ring-pulse {
   0% { transform: scale(0.6); opacity: 0.55; }
