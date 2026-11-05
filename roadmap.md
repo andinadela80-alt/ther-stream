@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add and verify the public mint page's live minted counter, BscScan contract link, and four original NFT previews.
+- [x] Add and verify the public mint page's live minted counter, BscScan contract link, and four original NFT previews.
 
 - [ ] Connect the deployed Genesis Pass contract to public minting, live supply/price, eligibility checks, and confirmed transaction status.
 
